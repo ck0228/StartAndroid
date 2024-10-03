@@ -197,11 +197,8 @@ docker build --build-arg userid=$(id -u) --build-arg groupid=$(id -g) --build-ar
 ```
 Then you can start up new instances with:
 ```
+cd ~/android-source
 docker run -it --rm -v $(pwd):/src android-build-trusty
-
-or
-
-docker run -it --rm -v "$(pwd)":/src android-build-trusty
 ```
 #### 3-5. build sourcecode in to docker
 빌드
