@@ -190,5 +190,5 @@ su - android
 cd /src
 source build/envsetup.sh
 lunch aosp_arm-eng
-m -j50
+m -j4
 ```
