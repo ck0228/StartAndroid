@@ -145,27 +145,31 @@ ENTRYPOINT ["chroot", "--userspec=$(cat /root/username):$(cat /root/username)", 
 ```
 위 부분을 지우고 아래와 같이 수정
 ```
-RUN if [ "$username" != "root" ]; then \
-      groupadd -g $groupid $username && \
-      useradd -m -u $userid -g $groupid $username && \
-      echo $username >/root/username && \
-      echo "export USER=$username" >>/home/$username/.gitconfig; \
-    else \
-      echo $username >/root/username && \
-      echo "export USER=$username" >>/root/.gitconfig; \
-    fi
-                                                                                                                        RUN if [ "$username" != "root" ]; then \
-      echo "[user]\n    name = Android Builder\n    email = android@example.com\n[color]\n    ui = auto" > /home/$usern>      chown $userid:$groupid /home/$username/.gitconfig; \
-    else \
-      echo "[user]\n    name = Android Builder\n    email = android@example.com\n[color]\n    ui = auto" > /root/.gitco>    fi
+# android 사용자 생성 및 설정
+RUN adduser --disabled-password --gecos '' android \
+    && usermod -aG sudo android \
+    && echo "android ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-ENV HOME=/home/$username
-ENV USER=$username
+# 홈 디렉토리 및 .gitconfig 설정
+RUN echo "[user]\n    name = Android Builder\n    email = android@example.com\n[color]\n    ui = auto" > /home/android/.gitconfig \
+    && chown android:android /home/android/.gitconfig
+
+# 작업 디렉토리 생성 및 권한 설정
+RUN mkdir -p /src/out \
+    && chown -R android:android /src \
+    && chmod -R 755 /src/out
+
+# 환경 변수 설정
+ENV HOME=/home/android
+ENV USER=android
+
+# 사용자 전환
+USER android
 
 ENTRYPOINT ["/bin/bash", "-i"]
 ```
 
-#### 3-4. Build Container
+#### 3-4. Build & Run Container
 ```
 cd ~/android-source
 docker build --build-arg userid=$(id -u) --build-arg groupid=$(id -g) --build-arg username=$(id -un) -t android-build-trusty build/tools/docker
@@ -174,19 +178,9 @@ Then you can start up new instances with:
 ```
 docker run -it --rm -v $(pwd):/src android-build-trusty
 ```
-#### 3-5. get in to docker
-container 내부에서 사용자 생성 및 소유권 변경
-```
-adduser android
-usermod -aG sudo android
-chown -R android:android /src
-chown -R android:android /src/out
-chmod -R 755 /src/out
-export USER=android
-```
+#### 3-5. build sourcecode in to docker
 빌드
 ```
-su - android
 cd /src
 source build/envsetup.sh
 lunch aosp_arm-eng
