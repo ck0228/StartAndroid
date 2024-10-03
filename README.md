@@ -8,10 +8,10 @@ Studying Inside Android OS
    1-1. Linux activate
    관리자 권한으로 Windows PowerShell 실행 후 명령어 입력
 
-# Windows SubSystem Linux를 활성화시키는 명령어
+   Windows SubSystem Linux를 활성화시키는 명령어
 > dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
 
-# VirtualMachinePlatform 기능을 활성화시키는 명령어 : WSL2 버전에 필요한 명령어
+   VirtualMachinePlatform 기능을 활성화시키는 명령어 : WSL2 버전에 필요한 명령어
 > dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
 
 
