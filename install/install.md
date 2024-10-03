@@ -56,6 +56,27 @@ docker version
 ```
 ![image](https://github.com/user-attachments/assets/da694025-3fa3-42a0-a710-d41f720efc21)
 
+#### 2-4. Docker 할당 메모리 변경
+
+.wslconfig 파일 생성 또는 편집:
+Windows에서 다음 경로에 .wslconfig 파일을 생성하거나 편집합니다:
+```
+C:\Users\<YourUserName>\.wslconfig
+```
+.wslconfig 파일에 아래 내용 입력
+```
+[wsl2]
+memory=16GB
+processors=4
+swap=8GB
+localhostForwarding=true
+```
+
+변경사항 적용:
+```
+wsl --shutdown
+```
+
 ### 3. AOSP
 
 #### 3-1. 필수패키지 다운로드
