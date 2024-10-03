@@ -1,5 +1,3 @@
-# StartAndroid: Studying Inside Android OS
-
 ## Install
 
 ### 1. WSL
@@ -50,3 +48,10 @@ wsl -l -v
 
 #### 2-2. Docker Desktop 앱 설정
 ![Docker Desktop 설정](https://github.com/user-attachments/assets/efe2ead0-6001-4a8f-bcd8-36645717b6ed)
+
+#### 2-3. Docker 실행 확인
+```
+wsl -l -v
+docker version
+```
+![image](https://github.com/user-attachments/assets/da694025-3fa3-42a0-a710-d41f720efc21)
