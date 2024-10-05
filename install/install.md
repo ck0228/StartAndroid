@@ -29,7 +29,7 @@ dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /nores
    ```
 4. Ubuntu 설치:
    ```
-   wsl --install -d Ubuntu
+   wsl --install -d Ubuntu20.04
    ```
 
 #### 1-4. WSL 버전 확인
@@ -41,28 +41,51 @@ wsl -l -v
 결과 예시:
 ![WSL 버전 확인](https://github.com/user-attachments/assets/313cd0a1-84b8-47ff-b37b-70439624b03f)
 
+#### 1-5. wsl limit 해제
+.wslconfig 파일 생성 또는 편집: Windows에서 다음 경로에 .wslconfig 파일을 생성하거나 편집합니다:
+
+C:\Users\<YourUserName>\.wslconfig
+.wslconfig 파일에 아래 내용 입력
+
+[wsl2]
+memory=16GB
+processors=4
+swap=8GB
+localhostForwarding=true
+변경사항 적용:
+
+```
+wsl --shutdown
+```
+
+
 ### 3. AOSP
 
 #### 3-1. 필수패키지 다운로드
 on ubuntu
 ```
-sudo apt update
-sudo apt install git-core gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig
-sudo apt-get install openjdk-8-jre
-```
-```
-apt install repo
+sudo apt-get update
+sudo apt-get install git-core gnupg flex bison build-essential zip curl zlib1g-dev libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig zip libncurses5
+sudo apt-get repo
 ```
 
 #### 3-2. Source Code download
 it takes time
 ```
-mkdir ~/android-source
-cd ~/android-source
+mkdir /mnt/c/Android
+PATH=/mnt/c/Android:$PATH
+cd /mnt/c/Android
+curl https://storage.googleapis.com/git-repo-downloads/repo > repo
+chmod a+x repo
+
+git config --global user.name "Chan Kim"
+git config --global user.email "chansk0228@gmail.com"
+sudo apt-get install python-is-python3
+
 repo init -u https://android.googlesource.com/platform/manifest -b android-8.0.0_r1
-repo sync
+repo sync -c -j4
 ```
-if somthing is wrong do this again
+if somthing is wrong do this
 ```
 repo sync
 ```
@@ -70,8 +93,9 @@ repo sync
 #### 3-5. build sourcecode in to docker
 빌드
 ```
-cd ~/android-source
+cd /mnt/c/Android
 source build/envsetup.sh
-lunch aosp_arm-eng
+lunch
+6
 m -j$(nproc)
 ```
