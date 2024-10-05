@@ -72,9 +72,9 @@ sudo apt-get repo
 #### 3-2. Source Code download
 it takes time
 ```
-mkdir /mnt/c/android
-PATH=/mnt/c/android:$PATH
-cd /mnt/c/android
+mkdir ~/android-source
+PATH=~/android-source:$PATH
+cd ~/android-source
 curl https://storage.googleapis.com/git-repo-downloads/repo > repo
 chmod a+x repo
 
@@ -93,7 +93,7 @@ repo sync
 #### 3-5. build sourcecode in to docker
 빌드
 ```
-cd /mnt/c/android
+cd ~/android-source
 source build/envsetup.sh
 lunch
 6
