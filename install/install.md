@@ -77,7 +77,17 @@ PATH=~/android-source:$PATH
 cd ~/android-source
 curl https://storage.googleapis.com/git-repo-downloads/repo > repo
 chmod a+x repo
+```
+path 설정
+```
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
+export PATH="/usr/bin:$PATH"
+export PYTHON_CONFIGURE_OPTS="--enable-unicode=ucs4"
+export PATH=~/bin:$PATH
+```
 
+```
 git config --global user.name "Chan Kim"
 git config --global user.email "chansk0228@gmail.com"
 sudo apt-get install python-is-python3
@@ -85,6 +95,7 @@ sudo apt-get install python-is-python3
 repo init -u https://android.googlesource.com/platform/manifest -b android-8.0.0_r1
 repo sync -c -j4
 ```
+
 if somthing is wrong do this
 ```
 repo sync
