@@ -108,5 +108,7 @@ cd ~/android-source
 source build/envsetup.sh
 lunch
 6
+export ANDROID_COMPILE_WITH_JACK=false
+make clobber
 m -j$(nproc)
 ```
