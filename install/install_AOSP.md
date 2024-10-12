@@ -96,9 +96,9 @@ repo sync
 #### 3-5. build sourcecode in to docker
 빌드
 ```
-cd ~/android-source
+cd ~/aosp
 source build/envsetup.sh
-lunch
+lunch aosp_cf_x86_64_phone-trunk_staging-eng
 make clobber
 m -j$(nproc)
 ```
