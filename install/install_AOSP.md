@@ -101,6 +101,6 @@ source build/envsetup.sh
 lunch aosp_cf_x86_64_phone-ap1a-eng
 build_build_var_cache
 lunch
-## select lunch menu ## I did - aosp_x86_64-trunk_staging-eng
+## select lunch menu ## I did - lunch aosp_cf_x86_64_phone-trunk_staging-eng
 m -j$(nproc)
 ```
