@@ -104,3 +104,4 @@ lunch
 ## select lunch menu ## I did - lunch aosp_cf_x86_64_phone-trunk_staging-eng
 m -j$(nproc)
 ```
+WSL에서는 cuttlefish실행이 안됨
