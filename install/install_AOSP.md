@@ -109,6 +109,7 @@ WSL에서는 cuttlefish실행이 안됨
 lunch aosp_x86_64-trunk_staging-userdebug
 m -j16
 ```
+```
 ============================================
 PLATFORM_VERSION_CODENAME=VanillaIceCream
 PLATFORM_VERSION=VanillaIceCream
@@ -124,3 +125,4 @@ HOST_CROSS_OS=windows
 BUILD_ID=MAIN
 OUT_DIR=out
 ============================================
+```
