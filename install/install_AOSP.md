@@ -105,3 +105,7 @@ lunch
 m -j$(nproc)
 ```
 WSL에서는 cuttlefish실행이 안됨
+```
+lunch aosp_x86_64-trunk_staging-userdebug
+m -j16
+```
