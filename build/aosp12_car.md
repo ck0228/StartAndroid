@@ -19,3 +19,8 @@ source build/envsetup.sh
 lunch aosp_car_x86_64-userdebug
 emulator
 ```
+
+retry with this v
+```
+sdk_car_x86_64-userdebug
+```
