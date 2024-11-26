@@ -34,6 +34,7 @@ cd ~/aaos
 source build/envsetup.sh
 lunch sdk_car_x86_64-userdebug
 m clean
+m -j12
 ```
 - 데이터 초기화
 ```
