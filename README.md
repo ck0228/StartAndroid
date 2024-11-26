@@ -9,7 +9,7 @@
 6. EV Battery Level Change for test
 
 # Env
-OS : linux
-Verion : android 12
-Branch : android-12.0.0_r13
-Lunch : sdk_car_x86_64-userdebug
+- OS : linux
+- Verion : android 12
+- Branch : android-12.0.0_r13
+- Lunch : sdk_car_x86_64-userdebug
