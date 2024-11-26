@@ -26,15 +26,19 @@ sudo adb start-server
 emulator
 ```
 
-emulator 문제 발생시
-1. emulator 삭제
+emulator 문제 발생 유형
+- 이도저도 안되면 emulator 삭제 후 rebuild
 ```
-rm -rf ~/.android/avd/<에뮬레이터_이름>.avd
-rm -rf ~/.android/avd/<에뮬레이터_이름>.ini
-```
-2. rebuild
-```
+rm -rf ~/.android/avd/*
 cd ~/aaos
 source build/envsetup.sh
 lunch sdk_car_x86_64-userdebug
+```
+- 데이터 초기화
+```
+emulator -wipe-data
+```
+- phone is starting에서 안넘어감
+```
+emulator -netspeed full -netdelay none
 ```
