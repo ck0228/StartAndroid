@@ -76,7 +76,13 @@ adb root
 adb shell ifconfig eth0 down
 adb shell ifconfig eth0 up
 ```
+
 [서버 재부팅]
 ```
 adb reboot
+```
+
+이건 검증중
+```
+adb shell ip route flush table main
 ```
