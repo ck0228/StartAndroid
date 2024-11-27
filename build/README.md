@@ -87,4 +87,5 @@ adb reboot
 adb shell ip route flush table main
 adb shell svc wifi disable
 adb shell svc wifi enable
+adb shell ip route add default via 10.0.2.2
 ```
