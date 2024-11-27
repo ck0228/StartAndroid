@@ -85,4 +85,6 @@ adb reboot
 이건 검증중
 ```
 adb shell ip route flush table main
+adb shell svc wifi disable
+adb shell svc wifi enable
 ```
