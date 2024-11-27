@@ -48,10 +48,22 @@ emulator -wipe-data
 adb shell
 ifcofig
 ```
-eth0 또는 wlan0 인터페이스가 존재하고 IP 주소가 할당 확인
-IP 주소가 없다면 DHCP 설정 문제
-  예시) eth0 Link encap:UNSPEC Driver virtio_net inet addr:10.0.2.15 Bcast:10.255.255.255 Mask:255.0.0.0 << 이부분 확인 네트워크 문제 시 없음
-  
+1. **인터페이스 확인**:
+   - `eth0` 또는 `wlan0` 인터페이스가 존재해야 합니다.
+
+2. **IP 주소 할당 확인**:
+   - 각 인터페이스에 **IP 주소**가 할당되어 있는지 확인합니다.
+   - IP 주소가 없다면 **DHCP 설정 문제**일 수 있습니다.
+
+   예시:
+
+   eth0      Link encap:UNSPEC    Driver virtio_net
+             inet addr:10.0.2.15   Bcast:10.255.255.255  Mask:255.0.0.0
+
+
+위와 같은 형식의 출력에서 `inet addr` 부분이 확인되지 않는다면, 네트워크 문제가 있을 수 있습니다.
+
+
 [에뮬레이터 네트워크 설정 초기화]
 ```
 adb emu kill
