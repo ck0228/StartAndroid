@@ -10,34 +10,19 @@
 7. EV Battery Level Change for test
 
 ## Architecture
-+-------------------------+
-|     EvSafe Application   |
-|    (EvsSpeedManager)    |
-+------------+------------+
-             |
-             |
-+------------v------------+
-|           API           |
-|  (stub, binder, api)    |
-+------------+------------+
-             |
-             |
-+------------v------------+
-|    EvSafe System Service  |
-| (EvsBatteryManager, EvsGearManager) |
-+------------+------------+
-             |
-             |
-+------------v------------+
-|   Android System Service  |
-|    (CarPropertyManager)   |
-+------------+------------+
-             |
-             |
-+------------v------------+
-|    OS System Service      |
-|  (Notification, Toast Message) |
-+-------------------------+
+| Layers                      | Details                                 |
+|-------------------------------|-----------------------------------------|
+| **EvSafe Application**         | EvsSpeedManager                      |
+|                               |                                         |
+| **API**                       | stub, binder, aidl                    |
+|                               |                                         |
+| **EvSafe System Service**      | EvsBatteryManager, EvsGearManager    |
+|                               |                                         |
+| **Android System Service**     | CarPropertyManager                   |
+|                               |                                         |
+| **OS System Service**          | Notification, Toast Message         |
+
+
 
 # Env
 - OS : linux
