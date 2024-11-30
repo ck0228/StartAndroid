@@ -10,7 +10,7 @@
 7. EV Battery Level Change for test
 
 ## Architecture
-| Layers                      | Details                                 |
+| Layers                      | Components                                 |
 |-------------------------------|-----------------------------------------|
 | **EvSafe Application**         | EvsSpeedManager                      |
 |                               |                                         |
