@@ -29,3 +29,7 @@
 - Verion : android 12
 - Branch : android-12.0.0_r13
 - Lunch : sdk_car_x86_64-userdebug
+
+# References
+- https://developer.android.com/reference/android/car/VehiclePropertyIds?hl=en
+- https://cs.android.com/android/platform/superproject/+/android-12.0.0_r14:
