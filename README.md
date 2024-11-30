@@ -1,12 +1,39 @@
 # AOSP based Andorid Automotive OS
 
 ## Key Features
-1. Gear Status Check : P/R/N/D
-2. EV Battery level
-3. Available Distance
-4. Lock Game app while driving
-5. EV Battery Status Change
-6. EV Battery Level Change for test
+1. Gear Status Check and Display : P/R/N/D
+2. EV Battery level Display
+3. Speed Display
+4. Available Distance Display
+5. Lock Game app while driving - Toast message
+6. EV Battery Low Alarm - Notification
+7. EV Battery Level Change for test
+
+## Architecture
++-------------------------+
+|    EvSafe Application   | -- EvsSpeedManager
++------------+------------+
+             |
+             |
++------------v------------+
+|           API           | -- stub, binder, api
++------------+------------+
+             |
+             |
++------------v------------+
+|  EvSafe System Service  | -- EvsBatteryManager, EvsGearManager
++-------------------------+
+             |
+             |
++------------v------------+
+| Android System Service  | -- CarPropertyManager
++-------------------------+
+             |
+             |
++------------v------------+
+|    OS System Service    | -- Notification, Toast Message
++-------------------------+
+
 
 # Env
 - OS : linux
