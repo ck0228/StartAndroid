@@ -11,29 +11,33 @@
 
 ## Architecture
 +-------------------------+
-|    EvSafe Application   | -- EvsSpeedManager
+|     EvSafe Application   |
+|    (EvsSpeedManager)    |
 +------------+------------+
              |
              |
 +------------v------------+
-|           API           | -- stub, binder, api
+|           API           |
+|  (stub, binder, api)    |
 +------------+------------+
              |
              |
 +------------v------------+
-|  EvSafe System Service  | -- EvsBatteryManager, EvsGearManager
-+-------------------------+
+|    EvSafe System Service  |
+| (EvsBatteryManager, EvsGearManager) |
++------------+------------+
              |
              |
 +------------v------------+
-| Android System Service  | -- CarPropertyManager
-+-------------------------+
+|   Android System Service  |
+|    (CarPropertyManager)   |
++------------+------------+
              |
              |
 +------------v------------+
-|    OS System Service    | -- Notification, Toast Message
+|    OS System Service      |
+|  (Notification, Toast Message) |
 +-------------------------+
-
 
 # Env
 - OS : linux
