@@ -1,0 +1,19 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.evsafe">
+
+    <!-- car sensor 접근 필수 권한 추가 -->
+    <uses-permission android:name="android.car.permission.CAR_ENGINE_DETAILED" />
+    <uses-permission android:name="android.car.permission.READ_CAR_PROPERTIES" /> 
+
+    <application
+        android:label="EVSafe"
+        android:icon="@mipmap/ic_launcher">
+        <activity android:name=".MainActivity"                     
+                android:exported="true"> <!-- apk설치 위한 속성 추가(android 최신 버전 명기 필요) -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
