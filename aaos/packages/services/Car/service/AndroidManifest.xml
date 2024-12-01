@@ -927,15 +927,6 @@
          android:allowBackup="false"
          android:persistent="true">
 
-        <!-- EvSafeService 등록 -->
-        <service
-            android:name=".evsafe.EvSafeService"
-            android:permission="android.permission.BIND_CAR_SERVICE">
-            <intent-filter>
-                <action android:name="android.car.CarService" />
-            </intent-filter>
-        </service>
-
         <service android:name=".CarService"
              android:singleUser="true"
              android:exported="true">
@@ -943,6 +934,17 @@
                 <action android:name="android.car.ICar"/>
             </intent-filter>
         </service>
+
+     <!-- EvSafeService-->
+        <service android:name=".EvSafeService"
+             android:permission="android.car.permission.CAR_PROPERTY"
+             android:exported="true">
+            <intent-filter>
+                <action android:name="android.car.evsafeservice.IEvSafeService"/>
+            </intent-filter>
+        </service>
+     <!-- EvSafeService-->
+
         <service android:name=".PerUserCarService"
             android:exported="false"/>
         <service android:name=".telemetry.ScriptExecutor"
