@@ -1,0 +1,14 @@
+android_app {
+    name: "EVSafe",
+    srcs: ["src/main/java/**/*.java"],
+    resource_dirs: ["res"],
+    platform_apis: true,
+    static_libs: [
+        "android.car",
+        "android-support-annotations",
+    ],
+//    required: ["allowed_privapp_com.android.car.evsafe"],
+    privileged: true,
+    certificate: "platform",
+    manifest: "AndroidManifest.xml",
+}
