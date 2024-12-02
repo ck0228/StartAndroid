@@ -20,19 +20,20 @@
   - [ ] 2) EV Battery level Check on System Service
      
 APIs
-path: aosp/frameworks/base/core/java/android/app
-EvSafeServiceManager.java
+- path: aosp/frameworks/base/core/java/android/app
+- EvSafeServiceManager.java
+- IEvSafeServiceManager.aidl
+- IEvSafeServiceManager.java
 
-IEvSafeServiceManager.aidl
-IEvSafeServiceManager.java
 Service
-path: aosp/frameworks/base/services/core/java/com/android/server/
-EvSafeService.java
+- path: aosp/frameworks/base/services/core/java/com/android/server/
+- EvSafeService.java
+
 Register Service
-Modify:
-frameworks/base/core/java/app/SystemServiceRegistry.java
-frameworks/base/core/java/content/Context.java
-frameworks/base/services/java/com/android/server/SystemServer.java
+- Modify:
+- frameworks/base/core/java/app/SystemServiceRegistry.java
+- frameworks/base/core/java/content/Context.java
+- frameworks/base/services/java/com/android/server/SystemServer.java
 ------------------------------------
 ### STEP 3 (TBU)
 #### EVSafe System Service + System Alarm
