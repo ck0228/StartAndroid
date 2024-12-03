@@ -114,5 +114,12 @@ public interface IEvSafeServiceManager extends android.os.IInterface
    * Demonstrates some basic types that you can use as parameters
    * and return values in AIDL.
    */
-  public void printEvSafe() throws android.os.RemoteException;
+  @SuppressLint("RethrowRemoteException")
+  public void printEvSafe(){
+    try {
+    }
+    catch (android.os.RemoteException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }
