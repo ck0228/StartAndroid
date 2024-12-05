@@ -1,0 +1,11 @@
+android_app {
+    name: "evsafe_service",
+    srcs: ["src/**/*.java"],
+    platform_apis: true,
+    privileged: true,
+    static_libs: [
+        "android.car",
+        "android-support-annotations",
+    ],
+    // manifest: "AndroidManifest.xml",
+}
