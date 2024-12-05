@@ -1,0 +1,40 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.evsafe"> <!-- tools 네임스페이스 선언 -->
+
+    <!-- car sensor 접근 필수 권한 추가 -->
+    <uses-permission android:name="android.car.permission.CAR_SPEED" />
+    <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
+    <uses-permission android:name="android.car.permission.CAR_INFO" />
+    <uses-permission android:name="android.car.permission.CAR_ENERGY" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
+ 
+    <!-- Car feature requirement -->
+    <uses-feature 
+        android:name="android.hardware.type.automotive" 
+        android:required="true" />
+
+    <application
+        android:label="EVSafe"
+        android:icon="@mipmap/ic_launcher"
+        android:theme="@android:style/Theme.DeviceDefault"
+        android:directBootAware="true">
+
+        <!-- Car application metadata -->
+        <meta-data 
+            android:name="android.car.application"
+            android:value="true" />
+
+        <!-- Main Activity --> 
+        <activity android:name=".MainActivity"                     
+                android:exported="true" 
+                android:label="@string/app_name"
+            android:screenOrientation="landscape"> <!-- apk설치 위한 속성 exported -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+ 
