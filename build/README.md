@@ -3,8 +3,8 @@ build
 ```
 cd ~/aaos
 source build/envsetup.sh
-lunch
-sdk_car_x86_64-userdebugm
+lunch sdk_car_x86_64-userdebug
+m
 ```
 
 open CarService with vscode
