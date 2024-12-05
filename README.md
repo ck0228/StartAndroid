@@ -8,19 +8,19 @@
 - [X] Current Speed Display
 - [X] Available Distance Display
 ------------------------------------
-### STEP 2 (🔥 WORKING ON)
+### STEP 2 (✅ COMPLETE)
 #### EVSafe App Service
 - [X] Gear Status Check and Toast Meesage : if not P
 - [X] Current Speed Check and Notification : if too fast
 
 #### EvSafeService
 - Gear Status Check and Toast Meesage : if not P
-    - [ ] Gear Status Check on System Service
+    - [X] Gear Status Check on System Service
 
 -  Speed Check on System Service
-    - [ ] Current Speed Check on System Service
+    - [X] Current Speed Check on System Service
 ------------------------------------
-### STEP 3 (TBU)
+### STEP 3 (🔥 WORKING ON)
 #### EvSafeService
 -  Gear Status Check and Toast Meesage : if not P
     - [ ] Toast message on Specific App
