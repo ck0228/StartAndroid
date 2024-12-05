@@ -23,10 +23,10 @@
 ### STEP 3 (🔥 WORKING ON)
 #### EvSafeService
 -  Gear Status Check and Toast Meesage : if not P
-    - [ ] Toast message on Specific App
+    - [ ] Toast message on Specific App : EVSafe
 
 - Speed Check on System Service
-    - [ ] Send Notification if too fast
+    - [X] Send Notification when Available Range is below 100km
 ------------------------------------
 
 ## Architecture
