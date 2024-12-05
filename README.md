@@ -14,19 +14,19 @@
 - [ ] Current Speed Check and Notification : if too fast
 
 #### EvSafeService
-- [ ] Gear Status Check and Toast Meesage : if not P
-  - [ ] 1) Gear Status Check on System Service
+- Gear Status Check and Toast Meesage : if not P
+  - [ ] Gear Status Check on System Service
 
-- [ ] Speed Check on System Service
-  - [ ] 1) Current Speed Check on System Service
+-  Speed Check on System Service
+  - [ ] Current Speed Check on System Service
 ------------------------------------
 ### STEP 3 (TBU)
 #### EvSafeService
-- [ ] Gear Status Check and Toast Meesage : if not P
-  - [ ] 2) Toast message on Specific App
+-  Gear Status Check and Toast Meesage : if not P
+  - [ ] Toast message on Specific App
 
-- [ ] Speed Check on System Service
-  - [ ] 2) Send Notification if too fast
+- Speed Check on System Service
+  - [ ] Send Notification if too fast
 ------------------------------------
 
 ## Architecture
