@@ -32,15 +32,15 @@
 ## Architecture
 | Layers                      | Components                                 |
 |-------------------------------|-----------------------------------------|
-| **EvSafe Application**         | updateVehicleStatus()<br> - Gear<br> - Battery<br> - Speed |
+| **EVSafe Application**         | updateVehicleStatus()<br> - Gear<br> - Battery<br> - Speed<br> - Range |
 |                               |                                         |
-| **API**                       | stub, binder, aidl                    |
+| **API**                       | intent, binder, car api                    |
 |                               |                                         |
-| **EvSafe System Service**      | EvsBatteryManager, EvsGearManager    |
+| **EvSafeService**      | EvSafeService    |
 |                               |                                         |
-| **Android System Service**     | CarPropertyManager                   |
+| **Android Native Service**     | CarPropertyManager                   |
 |                               |                                         |
-| **OS System Service**          | Notification, Toast Message         |
+| **OS System Service**          | Notification, Toast Message, Service     |
 
 
 
