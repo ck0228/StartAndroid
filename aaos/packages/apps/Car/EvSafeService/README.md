@@ -8,6 +8,9 @@ mmm packages/apps/EvSafeService
 ```
 
 ## RUN
+it will run on boot
+
+but if you still need somehow
 ```
 adb shell am start-foreground-service -n com.android.car.evsafeservice/.EvSafeService
 ```
