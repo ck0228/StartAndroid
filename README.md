@@ -6,39 +6,27 @@
 - [X] Gear Status Check and Display : P/R/N/D
 - [X] EV Battery level Display
 - [X] Current Speed Display
-- [ ] Available Distance Display
+- [X] Available Distance Display
 ------------------------------------
 ### STEP 2 (🔥 WORKING ON)
-#### EVSafe System Service
-- [ ] Disable Game App on Gear D
+#### EVSafe App Service
+- [ ] Gear Status Check and Toast Meesage : if not P
+- [ ] Current Speed Check and Notification : if too fast
+
+#### EvSafeService
+- [ ] Gear Status Check and Toast Meesage : if not P
   - [ ] 1) Gear Status Check on System Service
-  - [ ] 2) Disable Game App
 
-
-- [ ] EV Battery Level Check on System Service
-  - [ ] 1) Input Battery Level
-  - [ ] 2) EV Battery level Check on System Service
-     
-APIs
-- path: aosp/frameworks/base/core/java/android/app
-- EvSafeServiceManager.java
-- IEvSafeServiceManager.aidl
-- IEvSafeServiceManager.java
-
-Service
-- path: aosp/frameworks/base/services/core/java/com/android/server/
-- EvSafeService.java
-
-Register Service
-- Modify:
-- frameworks/base/core/java/app/SystemServiceRegistry.java
-- frameworks/base/core/java/content/Context.java
-- frameworks/base/services/java/com/android/server/SystemServer.java
+- [ ] Speed Check on System Service
+  - [ ] 1) Current Speed Check on System Service
 ------------------------------------
 ### STEP 3 (TBU)
-#### EVSafe System Service + System Alarm
-- [ ] Disable Game App on Gear D **With Toast Message**
-- [ ] Low Battery **Notification**
+#### EvSafeService
+- [ ] Gear Status Check and Toast Meesage : if not P
+  - [ ] 2) Toast message on Specific App
+
+- [ ] Speed Check on System Service
+  - [ ] 2) Send Notification if too fast
 ------------------------------------
 
 ## Architecture
