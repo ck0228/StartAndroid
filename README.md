@@ -10,8 +10,8 @@
 ------------------------------------
 ### STEP 2 (🔥 WORKING ON)
 #### EVSafe App Service
-- [ ] Gear Status Check and Toast Meesage : if not P
-- [ ] Current Speed Check and Notification : if too fast
+- [X] Gear Status Check and Toast Meesage : if not P
+- [X] Current Speed Check and Notification : if too fast
 
 #### EvSafeService
 - Gear Status Check and Toast Meesage : if not P
