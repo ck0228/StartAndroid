@@ -1,0 +1,46 @@
+@startuml
+actor "User" as User
+participant "Notification" as Notification
+participant "Toast" as Toast
+participant "EvSafeService" as Service
+participant "BootCompleteReceiver" as Receiver
+participant "CarPropertyManager" as PropertyManager
+participant "UsageStatsManager" as UsageStatsManager
+participant "ActivityManager" as ActivityManager
+
+User -> Receiver: onReceive // Boot
+activate Receiver
+Receiver -> Service: startForegroundService()
+deactivate Receiver
+activate Service
+Service -> Service: onCreate()
+Service -> PropertyManager: initCar()
+Service --> Service: startForeground() // 서비스 시작
+Service -> Notification: createNotification()
+Service -> Service: updateRunnable (run)
+loop Runnable
+    Service -> PropertyManager: updateVehicleStatus()
+    Service -> Service: hasStatusChanged()    
+    alt Status Changed
+        Service -> Notification: updateNotification()
+        Service -> Service: checkWarningConditions()
+        alt Low Range Warning
+            Service -> Notification: showWarningNotification()
+        end
+        alt  Low Battery Warning
+            Service -> Notification: showWarningNotification()
+        end
+    end
+end
+
+
+User -> ActivityManager: 주행중 EvSafe App 실행
+loop 주행중 EVSafe 앱 실행 확인 // 미구현
+    Service -> Service: checkAndStopEvSafeApp()
+    Service -> UsageStatsManager: isAppRunning()
+    UsageStatsManager -> ActivityManager: killBackgroundProc()
+    ActivityManager --> ActivityManager: EVSafe 앱 종료
+    Service -> Toast: Toast.show()
+end
+deactivate Service
+@enduml
