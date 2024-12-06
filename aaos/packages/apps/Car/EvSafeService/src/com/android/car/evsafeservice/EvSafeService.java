@@ -71,9 +71,7 @@ public class EvSafeService extends Service {
     private Car car;
     private CarPropertyManager propertyManager;
     private Handler handler;
-
-    private boolean toastDisplayed = false;  // 토스트 플래그
-
+    
 
     @Override
     public void onCreate() {
@@ -375,7 +373,6 @@ public class EvSafeService extends Service {
 
     private void checkAndStopEvSafeApp() {
         if (!gearStatus.equals("P")) {
-            Log.d(TAG, "checkAndStopEvSafeApp: Gear is not in Park. Current gear: " + gearStatus);
             boolean isEvSafeRunning = isAppRunning("com.example.evsafe");
 
             if (isEvSafeRunning) {
@@ -391,13 +388,12 @@ public class EvSafeService extends Service {
                     Log.e(TAG, "checkAndStopEvSafeApp: EVSafe app not found", e);
                 }
             } else {
-                Log.d(TAG, "checkAndStopEvSafeApp: EVSafe app is not running.");
             }
         } else {
-            Log.d(TAG, "checkAndStopEvSafeApp: Gear is in Park. No action needed.");
         }
     }
 
+    // NOT WORKING YET
     private boolean isAppRunning(String packageName) {
         UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
         long endTime = System.currentTimeMillis();
