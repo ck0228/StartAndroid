@@ -32,15 +32,19 @@
 ## Architecture
 | Layers                      | Components                                 |
 |-------------------------------|-----------------------------------------|
-| **EVSafe Application**         | updateVehicleStatus()<br> - Gear<br> - Battery<br> - Speed<br> - Range |
+| **EVSafe Application**         | Notification, Toast, Views<br> - Gear, -Battery<br> - Speed, - Range |
 |                               |                                         |
-| **API**                       | intent, binder, car api                    |
+| **API**                       | updateVehicleStatus(), UpdateNotification() |
 |                               |                                         |
-| **EvSafeService**      | EvSafeService    |
+| **Car API**                   | CarPropertyManager, VehiclePropertyIDs |
 |                               |                                         |
-| **Android Native Service**     | CarPropertyManager                   |
+| **Android Native Service**     | Car Service, Service, NotificationManager |
 |                               |                                         |
-| **OS System Service**          | Notification, Toast Message, Service     |
+| **HAL**                       | Vehicle HAL     |
+
+
+## Sequence Diagram
+![EvSafeService_SequenceDiagram](https://github.com/user-attachments/assets/434e65c8-2ff3-4272-b7db-cc6958234936)
 
 
 
