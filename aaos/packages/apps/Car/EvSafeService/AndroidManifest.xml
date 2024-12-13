@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.android.car.evsafeservice">
 
     <!-- Allows us to inject input events (such as KeyEvent and MotionEvent) into the event stream
@@ -27,6 +28,7 @@
     <uses-permission android:name="android.car.permission.CAR_ENERGY" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
 
     <!-- Automotive feature requirement -->
     <uses-feature 
@@ -42,6 +44,21 @@
             android:name="android.car.application"
             android:value="true" />
 
+        <!-- Main Activity to launch EvSafeService -->
+        <!-- app icon 필요시
+        <activity android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher"
+            android:theme="@android:style/Theme.DeviceDefault"
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        -->
+
         <!-- Main service -->                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
         <service
             android:name=".EvSafeService"
@@ -49,7 +66,7 @@
             android:exported="true"
             android:enabled="true">
             <intent-filter>
-                <action android:name="com.example.evsafeservice.EV_SAFE_SERVICE"/>
+                <action android:name="com.android.car.evsafeservice.EV_SAFE_SERVICE"/>
             </intent-filter>
         </service>
 
