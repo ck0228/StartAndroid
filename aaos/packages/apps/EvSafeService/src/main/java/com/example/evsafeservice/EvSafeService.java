@@ -1,7 +1,11 @@
-package com.example.evsafeservice;
+package com.android.car.evsafeservice;
 
-import android.app.Service;
+import android.provider.Settings;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
@@ -11,43 +15,213 @@ import android.car.VehiclePropertyIds;
 import android.car.VehicleGear;
 import android.car.hardware.property.CarPropertyManager;
 import android.os.Handler;
+import android.os.Looper;
+import android.app.ActivityManager; // Toast 기능 위한 추가: mj
+import android.content.pm.ApplicationInfo; // Toast 기능 위한 추가: mj
+import android.content.pm.PackageManager; // Toast 기능 위한 추가: mj
+import android.widget.Toast; // Toast 기능 위한 추가: mj
+import android.app.usage.UsageStats; // 추가: UsageStats 클래스
+import android.app.usage.UsageStatsManager; // 추가: UsageStatsManager 클래스
+import android.app.AppOpsManager;
+
+import java.util.List; // List import 추가
+import java.util.Calendar;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 
 public class EvSafeService extends Service {
-    // Constants
-    private static final String TAG = "EVSafeService";
+    // Service identification constants
+    private static final String TAG = "EvSafeService";
     private static final int UPDATE_INTERVAL_MS = 1000;
-    private String gearStatus;
-    private float speedStatus;
-    private float batteryStatus;
-    private float rangeStatus;
 
-    // Car related members
+    private static final String SERVICE_CHANNEL_ID = "EvSafeServiceChannel";
+    private static final String WARNING_CHANNEL_ID = "EvSafeWarningChannel";
+    private static final String SERVICE_CHANNEL_NAME = "EV Safe Service Channel";
+    private static final String WARNING_CHANNEL_NAME = "EV Safe Warning Channel";
+    private static final String SERVICE_CHANNEL_DESC = "Monitors EV status";
+    private static final String WARNING_CHANNEL_DESC = "Shows important warnings";
+    private static final int SERVICE_NOTIFICATION_ID = 1;
+    private static final int WARNING_NOTIFICATION_ID = 2;
+    
+    // Warning threshold constants
+    private static final float BATTERY_WARNING_THRESHOLD = 20.0f; // Warning below 00%
+    private static final float RANGE_WARNING_THRESHOLD = 100.0f;   // Warning below 00km
+    
+    // Status tracking flags
+    private boolean isLowBatteryWarningShown = false;
+    private boolean isLowRangeWarningShown = false;
+    private boolean isServiceRunning = false;
+
+    // Add these fields to the class
+    private String previousGearStatus = "Unknown";
+    private float previousSpeedStatus = 0.0f;
+    private float previousBatteryStatus = 0.0f;
+    private float previousRangeStatus = 0.0f;
+
+    // Vehicle status variables
+    private String gearStatus = "Unknown";
+    private float speedStatus = 0.0f;
+    private float batteryStatus = 0.0f;
+    private float rangeStatus = 0.0f;
+
+    // System services
+    private NotificationManager notificationManager;
     private Car car;
     private CarPropertyManager propertyManager;
     private Handler handler;
 
-    // Update handler
-    private final Runnable updateRunnable = new Runnable() {
-        @Override
-        public void run() {
-            updateVehicleStatus();
-            handler.postDelayed(this, UPDATE_INTERVAL_MS);
-        }
-    };
+    private boolean toastDisplayed = false;  // 토스트 플래그
+
+    private ActivityManager mActivityManager;
+
+
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "EvSafeService started");
-        startForeground(1, getNotification());
-        handler = new Handler();
+        Log.d(TAG, "1. Service onCreate");
+        
+        // Initialize notification manager
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        createNotificationChannel();
+
+        // Initialize activity manager
+        mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        
+        // Initialize handler on main thread
+        handler = new Handler(Looper.getMainLooper());
+        
+        // Initialize car systems
         initCar();
-        handler.post(updateRunnable);
     }
 
-    private Notification getNotification() {
-        Log.d(TAG, "EvSafeService Notification for foreground");
-        return null;
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "2. Service onStartCommand");
+        
+        if (!isServiceRunning) {
+            isServiceRunning = true;
+            Log.d(TAG, "3. isServiceRunning to true");
+            startForeground(SERVICE_NOTIFICATION_ID, createNotification());
+            handler.post(updateRunnable);
+            Log.d(TAG, "4. Successfully started service");
+        }
+        
+        checkUsageStatsPermission(this);
+        
+        return START_STICKY;
+    }
+
+    // Status update runnable
+    private final Runnable updateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Log.d(TAG, "RUN1. Updating vehicle status...");
+            updateVehicleStatus();
+            
+            // Check if any status has changed
+            if (hasStatusChanged()) {
+
+                
+                Log.d(TAG, "RUN2. Status changed, Updating notification");
+                updateNotification();
+                updatePreviousStatus();
+
+                Log.d(TAG, "RUN3. Check Warning Condition and Notify if needed");
+                checkWarningConditions();
+            }
+
+            // Check running applications   
+            checkRunningApplications();
+
+            if (isServiceRunning) {
+                handler.postDelayed(this, UPDATE_INTERVAL_MS);
+            }
+        }
+    };
+
+
+    private Notification createNotification() {
+        Intent notificationIntent = new Intent(this, EvSafeService.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            notificationIntent,
+            PendingIntent.FLAG_IMMUTABLE
+        );
+    
+        String contentText = String.format(
+            "Battery: %.1f%% | Range: %.1fkm | Speed: %.1fkm/h | Gear: %s",
+            batteryStatus, rangeStatus, speedStatus, gearStatus
+        );
+        
+        return new Notification.Builder(this, SERVICE_CHANNEL_ID)
+            .setContentTitle("EV Safe Service")
+            .setContentText(contentText)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setOngoing(true)
+            .setContentIntent(pendingIntent)
+            .build();
+    }
+
+    private void showWarningNotification(String title, String message) {
+        Intent intent = new Intent(this, EvSafeService.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE
+        );
+    
+        Notification notification = new Notification.Builder(this, WARNING_CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build();
+    
+        if (notificationManager != null) {
+            notificationManager.notify(WARNING_NOTIFICATION_ID, notification);
+        }
+    }
+
+    private void createNotificationChannel() {
+        // Service channel (LOW importance)
+        NotificationChannel serviceChannel = new NotificationChannel(
+            SERVICE_CHANNEL_ID,
+            SERVICE_CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_LOW
+        );
+        serviceChannel.setDescription(SERVICE_CHANNEL_DESC);
+        serviceChannel.setShowBadge(false);
+        serviceChannel.enableLights(false);
+        serviceChannel.enableVibration(false);
+        notificationManager.createNotificationChannel(serviceChannel);
+    
+        // Warning channel (HIGH importance)
+        NotificationChannel warningChannel = new NotificationChannel(
+            WARNING_CHANNEL_ID,
+            WARNING_CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_HIGH
+        );
+        warningChannel.setDescription(WARNING_CHANNEL_DESC);
+        warningChannel.setShowBadge(true);
+        warningChannel.enableLights(true);
+        warningChannel.enableVibration(true);
+        notificationManager.createNotificationChannel(warningChannel);
+    }
+
+    private void updateNotification() {
+        if (isServiceRunning) {
+            notificationManager.notify(SERVICE_NOTIFICATION_ID, createNotification());
+        }
+    }
+
+    public static void startService(Context context) {
+        Intent serviceIntent = new Intent(context, EvSafeService.class);
+        context.startForegroundService(serviceIntent);
     }
 
     private void initCar() {
@@ -56,6 +230,42 @@ public class EvSafeService extends Service {
             propertyManager = (CarPropertyManager) car.getCarManager(Car.PROPERTY_SERVICE);
         } catch (Exception e) {
             Log.e(TAG, "Failed to create car manager", e);
+        }
+    }
+
+
+    private boolean hasStatusChanged() {
+        return !gearStatus.equals(previousGearStatus) ||
+            Math.abs(speedStatus - previousSpeedStatus) > 0.1f ||
+            Math.abs(batteryStatus - previousBatteryStatus) > 0.1f ||
+            Math.abs(rangeStatus - previousRangeStatus) > 0.1f;
+    }
+
+    private void updatePreviousStatus() {
+        previousGearStatus = gearStatus;
+        previousSpeedStatus = speedStatus;
+        previousBatteryStatus = batteryStatus;
+        previousRangeStatus = rangeStatus;
+    }
+
+
+    private void checkWarningConditions() {
+        // Check range warning
+        if (rangeStatus < RANGE_WARNING_THRESHOLD && !isLowRangeWarningShown) {
+            isLowRangeWarningShown = true;
+            showWarningNotification("Range Warning", 
+                String.format("주행가능거리가 %.1fkm 남았습니다.", rangeStatus));
+        } else if (rangeStatus >= RANGE_WARNING_THRESHOLD) {
+            isLowRangeWarningShown = false;
+        }
+    
+        // Check battery warning
+        if (batteryStatus < BATTERY_WARNING_THRESHOLD && !isLowBatteryWarningShown) {
+            isLowBatteryWarningShown = true;
+            showWarningNotification("Battery Warning", 
+                String.format("Low battery warning: %.1f%% remaining", batteryStatus));
+        } else if (batteryStatus >= BATTERY_WARNING_THRESHOLD) {
+            isLowBatteryWarningShown = false;
         }
     }
 
@@ -165,32 +375,89 @@ public class EvSafeService extends Service {
     
         // 속도에 따른 가중치 계산 함수
         private float calculateSpeedFactor(float speed) {
-            if (speed < 80) {
-                return 1.0f;
-            } else if (speed <= 100) {
-                return 0.7f;
-            } else {
-                return 0.5f;
+            return Math.max(0.1f, 1.0f - (speed * 0.0045f));
+        }
+
+
+
+    // activity monitoring
+    // 현재 실행 중인 애플리케이션 리스트 가져오기
+    public List<ActivityManager.RunningAppProcessInfo> getRunningApplications() {
+        return mActivityManager.getRunningAppProcesses();
+    }
+
+    // 실행 중인 태스크 가져오기
+    public List<ActivityManager.RunningTaskInfo> getRunningTasks(int maxNum) {
+        return mActivityManager.getRunningTasks(maxNum);
+    }
+
+    // 현재 포그라운드 앱 가져오기
+    public String getForegroundPackageName() {
+        List<ActivityManager.RunningAppProcessInfo> appProcesses = mActivityManager.getRunningAppProcesses();
+        if (appProcesses != null && !appProcesses.isEmpty()) {
+            for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
+                if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                    return appProcess.processName;
+                }
             }
         }
+        return null;
+    }
+
+    private void checkRunningApplications() {
+        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> runningApps = activityManager.getRunningAppProcesses();
+        
+        if (runningApps != null) {
+            for (ActivityManager.RunningAppProcessInfo processInfo : runningApps) {
+                if (processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                    Log.d(TAG, "Foreground app: " + processInfo.processName);
+                    // 특정 앱이 실행 중일 때 작업 수행
+                }
+            }
+        }
+    }
+
+    private void checkUsageStatsPermission(Context context) {
+        boolean granted = false;
+        AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), context.getPackageName());
+
+        if (mode == AppOpsManager.MODE_DEFAULT) {
+            granted = (context.checkCallingOrSelfPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) == PackageManager.PERMISSION_GRANTED);
+        } else {
+            granted = (mode == AppOpsManager.MODE_ALLOWED);
+        }
+
+        if (!granted) {
+            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        }
+    }
+
+    
     
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return START_STICKY; // Keep service running
-    }
-
-    @Override
     public void onDestroy() {
-        if (car != null) {
-            car.disconnect();
-        }
+        Log.d(TAG, "Service onDestroy");
+        isServiceRunning = false;
         handler.removeCallbacks(updateRunnable);
+        if (car != null) {
+            try {
+                car.disconnect();
+            } catch (Exception e) {
+                Log.e(TAG, "Error disconnecting car", e);
+            }
+            car = null;
+        }
+        stopForeground(true);
         super.onDestroy();
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null; // Not a bound service
+        return null;
     }
 }
