@@ -1,6 +1,6 @@
 # AOSP based Andorid Automotive OS
 
-## Key Features
+## Version 1 (✅ COMPLETED)
 ### STEP 1 (✅ COMPLETE)
 #### EVSafe App Service
 - [X] Gear Status Check and Display : P/R/N/D
@@ -21,13 +21,34 @@
     - [X] Current Speed Check on System Service
 ------------------------------------
 ### STEP 3 (🔥 WORKING ON)
-#### EvSafeService
--  Gear Status Check and Toast Meesage : if not P
-    - [ ] Toast message on Specific App : EVSafe
 
 - Speed Check on System Service
     - [X] Send Notification when Available Range is below 100km
 ------------------------------------
+
+## Version 2 (🔥 WORKING ON)
+### STEP 4 (🔥 WORKING ON)
+#### EvSafeService on Framework Level
+- [X] Vehicle Status callbacks
+- [X] Notification callbacks
+- [X] Boot callbacks
+- [X] Make Configs
+- [ ] Debug infinite Notification making issue
+- [ ] Deconnect ServiceNotification
+- [ ] Leave WarningNotification Only
+------------------------------------
+### STEP 5 ()
+- Interface with EvSafe App
+    - [ ] Send and Get Vehicle Status
+    - [ ] Update Status
+    - [ ] Handle EvSafe App
+
+
+
+
+
+
+
 
 ## Architecture
 | Layers                      | Components                                 |
