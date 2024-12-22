@@ -921,35 +921,11 @@
     <uses-permission android:name="android.permission.READ_LOGS"/>
     <!--  Used by NotificationHelper to change the notifications app name -->
     <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>
-    <!-- Used by EvSafeService -->
-    <uses-permission android:name="android.car.permission.CAR_SPEED" />
-    <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
-    <uses-permission android:name="android.car.permission.CAR_INFO" />
-    <uses-permission android:name="android.car.permission.CAR_ENERGY" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application android:label="@string/app_title"
          android:directBootAware="true"
          android:allowBackup="false"
          android:persistent="true">
-
-         <!-- EvSafeService -->
-        <service
-            android:name=".evsafeservice.EvSafeService"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </service>
-
-        <!-- BootCompleteReceiver -->
-        <receiver android:name=".evsafeservice.BootCompleteReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
 
         <service android:name=".CarService"
              android:singleUser="true"
@@ -958,6 +934,17 @@
                 <action android:name="android.car.ICar"/>
             </intent-filter>
         </service>
+
+     <!-- EvSafeService-->
+        <service android:name=".EvSafeService"
+             android:permission="android.car.permission.CAR_PROPERTY"
+             android:exported="true">
+            <intent-filter>
+                <action android:name="android.car.evsafeservice.IEvSafeService"/>
+            </intent-filter>
+        </service>
+     <!-- EvSafeService-->
+
         <service android:name=".PerUserCarService"
             android:exported="false"/>
         <service android:name=".telemetry.ScriptExecutor"
