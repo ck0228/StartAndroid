@@ -33,6 +33,7 @@
 - [X] Notification callbacks
 - [X] Boot callbacks
 - [X] Make Configs
+- [ ] Modify BluePrint and Manifest files(Still Studying)
 - [ ] Debug infinite Notification making issue
 - [ ] Deconnect ServiceNotification
 - [ ] Leave WarningNotification Only
