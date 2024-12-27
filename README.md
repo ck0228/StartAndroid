@@ -34,9 +34,9 @@
 - [X] Boot callbacks
 - [X] Make Configs
 - [ ] Modify BluePrint and Manifest files(Still Studying)
-- [ ] Debug infinite Notification making issue
-- [ ] Deconnect ServiceNotification
-- [ ] Leave WarningNotification Only
+- [X] Debug infinite Notification making issue
+- [X] Deconnect ServiceNotification
+- [X] Leave WarningNotification Only
 ------------------------------------
 ### STEP 5 ()
 - Interface with EvSafe App
