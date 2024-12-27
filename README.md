@@ -45,6 +45,13 @@
     - [ ] Handle EvSafe App
 
 
+-------------------------
+todo
+12-28 09:40:21.149   851   851 D EvSafeServiceVehiclePropertyHandler: Speed change mode: CONTINUOUS (mode:2), min rate: 1.0, max rate: 10.0
+12-28 09:40:21.149   851   851 D EvSafeServiceVehiclePropertyHandler: Battery change mode: CONTINUOUS (mode:2), min rate: 1.0, max rate: 100.0
+12-28 09:40:21.149   851   851 D EvSafeServiceVehiclePropertyHandler: Gear change mode: ONCHANGE (mode:1), min rate: 0.0, max rate: 0.0
+change mode check and update callback rate
+
 
 
 
