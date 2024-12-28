@@ -27,33 +27,25 @@
 ------------------------------------
 
 ## Version 2 (🔥 WORKING ON)
-### STEP 4 (🔥 WORKING ON)
+### STEP 4 (✅ COMPLETED)
 #### EvSafeService on Framework Level
 - [X] Vehicle Status callbacks
 - [X] Notification callbacks
 - [X] Boot callbacks
 - [X] Make Configs
-- [ ] Modify BluePrint and Manifest files(Still Studying)
 - [X] Debug infinite Notification making issue
 - [X] Deconnect ServiceNotification
 - [X] Leave WarningNotification Only
 ------------------------------------
-### STEP 5 ()
+### STEP 5 (🔥 WORKING ON)
 - Interface with EvSafe App
     - [ ] Send and Get Vehicle Status
     - [ ] Update Status
     - [ ] Handle EvSafe App
+- [ ] Modify BluePrint and Manifest files(Still Studying)
 
 
 -------------------------
-todo
-12-28 09:40:21.149   851   851 D EvSafeServiceVehiclePropertyHandler: Speed change mode: CONTINUOUS (mode:2), min rate: 1.0, max rate: 10.0
-12-28 09:40:21.149   851   851 D EvSafeServiceVehiclePropertyHandler: Battery change mode: CONTINUOUS (mode:2), min rate: 1.0, max rate: 100.0
-12-28 09:40:21.149   851   851 D EvSafeServiceVehiclePropertyHandler: Gear change mode: ONCHANGE (mode:1), min rate: 0.0, max rate: 0.0
-change mode check and update callback rate
-
-
-
 
 
 
