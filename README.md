@@ -37,20 +37,19 @@
 - [X] Deconnect ServiceNotification
 - [X] Leave WarningNotification Only
 ------------------------------------
-### STEP 5 (🔥 WORKING ON)
+### STEP 5 (✅ COMPLETEDN)
 - Interface with EvSafe App
-    - [ ] Send and Get Vehicle Status
-    - [ ] Update Status
-    - [ ] Handle EvSafe App
-- [ ] Modify BluePrint and Manifest files(Still Studying)
+    - [X] Send and Get Vehicle Status
+    - [X] Update Status
+    - [X] Handle EvSafe App
+- [X] Modify BluePrint and Manifest files
+------------------------------------
+### STEP 6 (Additional)
+- [ ] Study BluePrint and Manifest files
 
 
--------------------------
 
-
-
-
-## Architecture
+## Architecture -- need to be updated
 | Layers                      | Components                                 |
 |-------------------------------|-----------------------------------------|
 | **EVSafe Application**         | updateVehicleStatus()<br> - Gear<br> - Battery<br> - Speed<br> - Range |
