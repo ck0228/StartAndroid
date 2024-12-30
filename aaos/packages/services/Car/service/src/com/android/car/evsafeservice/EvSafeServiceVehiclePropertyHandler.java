@@ -1,6 +1,7 @@
 package com.android.car.evsafeservice;
 
 import android.car.hardware.property.CarPropertyManager;
+import android.car.hardware.CarPropertyConfig;
 import android.car.hardware.CarPropertyValue;
 import android.car.VehiclePropertyIds;
 import android.car.VehicleGear;
@@ -19,35 +20,81 @@ public class EvSafeServiceVehiclePropertyHandler {
     private final EvSafeServiceNotificationHelper notificationHelper;
     private boolean isLowRangeWarningShown;
     private boolean isLowBatteryWarningShown;
+    private EvSafeServiceStatus lastStatus;
 
-    /**
-     * Creates a new VehiclePropertyHandler
-     * @throws NullPointerException if any parameter is null
-     */
-    public EvSafeServiceVehiclePropertyHandler(CarPropertyManager propertyManager, 
-                                EvSafeServiceStatus currentStatus,
-                                EvSafeServiceNotificationHelper notificationHelper) {
+    public interface BroadcastCallback {
+        void onPropertyChanged();
+    }
+
+    private final BroadcastCallback broadcastCallback;
+
+    public EvSafeServiceVehiclePropertyHandler(
+            CarPropertyManager propertyManager,
+            EvSafeServiceStatus currentStatus,
+            EvSafeServiceNotificationHelper notificationHelper,
+            BroadcastCallback broadcastCallback) {
         this.propertyManager = Objects.requireNonNull(propertyManager, "PropertyManager cannot be null");
         this.currentStatus = Objects.requireNonNull(currentStatus, "EvSStatus cannot be null");
         this.notificationHelper = Objects.requireNonNull(notificationHelper, "NotificationHelper cannot be null");
+        this.broadcastCallback = Objects.requireNonNull(broadcastCallback, "BroadcastCallback cannot be null");
+        this.lastStatus = new EvSafeServiceStatus(currentStatus);
     }
+
 
     /**
      * Registers callbacks for vehicle property changes
      */
     public void registerListeners() {
         try {
-            propertyManager.registerCallback(propertyEventCallback, 
-                VehiclePropertyIds.GEAR_SELECTION, 
-                CarPropertyManager.SENSOR_RATE_ONCHANGE);
-            propertyManager.registerCallback(propertyEventCallback, 
+            // 각 속성의 changeMode 확인
+            CarPropertyConfig<?> speedConfig = propertyManager.getCarPropertyConfig(VehiclePropertyIds.PERF_VEHICLE_SPEED);
+            CarPropertyConfig<?> batteryConfig = propertyManager.getCarPropertyConfig(VehiclePropertyIds.EV_BATTERY_LEVEL);
+            CarPropertyConfig<?> gearConfig = propertyManager.getCarPropertyConfig(VehiclePropertyIds.GEAR_SELECTION);
+            Log.d(TAG, String.format("Speed change mode: %s (mode:%d), min rate: %.1f, max rate: %.1f", 
+                getChangeModeString(speedConfig.getChangeMode()),
+                speedConfig.getChangeMode(),
+                speedConfig.getMinSampleRate(),
+                speedConfig.getMaxSampleRate()));
+                
+            Log.d(TAG, String.format("Battery change mode: %s (mode:%d), min rate: %.1f, max rate: %.1f",
+                getChangeModeString(batteryConfig.getChangeMode()),
+                batteryConfig.getChangeMode(),
+                batteryConfig.getMinSampleRate(),
+                batteryConfig.getMaxSampleRate()));
+    
+            Log.d(TAG, String.format("Gear change mode: %s (mode:%d), min rate: %.1f, max rate: %.1f",
+                getChangeModeString(gearConfig.getChangeMode()),
+                gearConfig.getChangeMode(),
+                gearConfig.getMinSampleRate(),
+                gearConfig.getMaxSampleRate()));
+    
+            propertyManager.registerCallback(propertyEventCallback,
                 VehiclePropertyIds.PERF_VEHICLE_SPEED, 
-                CarPropertyManager.SENSOR_RATE_ONCHANGE);
-            propertyManager.registerCallback(propertyEventCallback, 
+                EvSafeServiceConstants.SensorRate.SPEED_SAMPLE_RATE);
+                
+            propertyManager.registerCallback(propertyEventCallback,
                 VehiclePropertyIds.EV_BATTERY_LEVEL, 
+                EvSafeServiceConstants.SensorRate.BATTERY_SAMPLE_RATE);
+                
+            propertyManager.registerCallback(propertyEventCallback,
+                VehiclePropertyIds.GEAR_SELECTION,
                 CarPropertyManager.SENSOR_RATE_ONCHANGE);
+                
         } catch (Exception e) {
             Log.e(TAG, "Failed to register property callbacks", e);
+        }
+    }
+    
+    private String getChangeModeString(int mode) {
+        switch (mode) {
+            case CarPropertyConfig.VEHICLE_PROPERTY_CHANGE_MODE_STATIC:
+                return "STATIC";
+            case CarPropertyConfig.VEHICLE_PROPERTY_CHANGE_MODE_ONCHANGE:
+                return "ONCHANGE";
+            case CarPropertyConfig.VEHICLE_PROPERTY_CHANGE_MODE_CONTINUOUS:
+                return "CONTINUOUS";
+            default:
+                return "UNKNOWN";
         }
     }
 
@@ -78,53 +125,88 @@ public class EvSafeServiceVehiclePropertyHandler {
             }
         };
 
-
-    private void handlePropertyChange(CarPropertyValue<?> value) {
+    public void handlePropertyChange(CarPropertyValue<?> value) {
+        if (value == null) {
+            Log.w(TAG, "Received null property value");
+            return;
+        }
+    
         try {
-            switch (value.getPropertyId()) {
+            int propertyId = value.getPropertyId();
+            Object propertyValue = value.getValue();
+            boolean valueChanged = false;
+    
+            switch (propertyId) {
                 case VehiclePropertyIds.GEAR_SELECTION:
-                    updateGearStatus((Integer) value.getValue());
+                    if (propertyValue instanceof Integer) {
+                        String gearStatus = convertGearToString((Integer) propertyValue);
+                        Log.d(TAG, "Received gear change: " + gearStatus);
+                        currentStatus.setGearStatus(gearStatus);
+                        valueChanged = true;
+                    }
                     break;
+    
                 case VehiclePropertyIds.PERF_VEHICLE_SPEED:
-                    updateSpeedStatus((Float) value.getValue());
+                    if (propertyValue instanceof Float) {
+                        Float newSpeed = convertSpeedLevel((Float) propertyValue);
+                        float currentSpeed = currentStatus.getspeedLevel();
+                        if (!Float.valueOf(currentSpeed).equals(newSpeed)) {
+                            updateSpeedStatus(newSpeed);
+                            valueChanged = true;
+                        }
+                    }
                     break;
+    
                 case VehiclePropertyIds.EV_BATTERY_LEVEL:
-                    updateBatteryStatus((Float) value.getValue());
+                    if (propertyValue instanceof Float) {
+                        Float newBattery = (Float) propertyValue;
+                        float currentBattery = currentStatus.getBatteryLevel();
+                        if (!Float.valueOf(currentBattery).equals(newBattery)) {
+                            updateBatteryLevel(newBattery);
+                            valueChanged = true;
+                        }
+                    }
                     break;
+    
                 default:
-                    Log.w(TAG, "Unexpected property ID: " + value.getPropertyId());
+                    Log.w(TAG, String.format("Unexpected property ID: %d", propertyId));
+                    return;
             }
-            checkWarningConditions();
-            notificationHelper.updateServiceNotification();
+    
+            if (valueChanged) {
+                broadcastCallback.onPropertyChanged();
+            }
+    
         } catch (Exception e) {
             Log.e(TAG, "Error handling property change", e);
-        }
-    }
-
-    private void updateGearStatus(Integer gearValue) {
-        if (gearValue != null) {
-            try {
-                currentStatus.setGearStatus(convertGearToString(gearValue));
-            } catch (Exception e) {
-                Log.e(TAG, "Error updating gear status", e);
-            }
         }
     }
 
     private void updateSpeedStatus(Float speedValue) {
         if (speedValue != null) {
             try {
-                currentStatus.setSpeedStatus(
-                    speedValue * EvSafeServiceConstants.Speed.SPEED_TO_KMH_MULTIPLIER);
+                currentStatus.setspeedLevel(speedValue);
+                // Speed Warning Check
+                if (speedValue > EvSafeServiceConstants.Speed.SPEED_WARNING_THRESHOLD 
+                    && !currentStatus.getSpeedWarning()) {
+                    currentStatus.setSpeedWarning(true);
+                    Log.d(TAG, "Speed warning triggered: " + speedValue);
+                    notificationHelper.showWarningNotification(
+                        "High Speed Warning",
+                        String.format("Speed exceeds %.1f km/h", speedValue));
+                } else if (speedValue <= EvSafeServiceConstants.Speed.SPEED_WARNING_THRESHOLD) {
+                    currentStatus.setSpeedWarning(false);
+                }
             } catch (Exception e) {
                 Log.e(TAG, "Error updating speed status", e);
             }
         }
     }
 
-    private void updateBatteryStatus(Float batteryValue) {
+    private void updateBatteryLevel(Float batteryValue) {
         if (batteryValue != null) {
             try {
+                currentStatus.setBatteryLevel(batteryValue);
                 float batteryPercentage = calculateBatteryPercentage(batteryValue);
                 currentStatus.setBatteryStatus(batteryPercentage);
                 updateRangeEstimate(batteryPercentage);
@@ -134,39 +216,28 @@ public class EvSafeServiceVehiclePropertyHandler {
         }
     }
 
-    private void checkWarningConditions() {
-        try {
-            checkBatteryWarning();
-            checkRangeWarning();
-        } catch (Exception e) {
-            Log.e(TAG, "Error checking warning conditions", e);
-        }
-    }
 
-    private void checkBatteryWarning() {
+    private boolean checkBatteryWarning() {
         float batteryLevel = currentStatus.getBatteryStatus();
         if (batteryLevel < EvSafeServiceConstants.VehicleStatus.LOW_BATTERY_THRESHOLD_PERCENT 
             && !isLowBatteryWarningShown) {
             isLowBatteryWarningShown = true;
+            Log.d(TAG, "Low battery warning triggered: " + batteryLevel);
             notificationHelper.showWarningNotification(
                 "Low Battery Warning",
                 String.format("Battery level critical: %.1f%%", batteryLevel));
+            return true;
         } else if (batteryLevel >= EvSafeServiceConstants.VehicleStatus.LOW_BATTERY_THRESHOLD_PERCENT) {
             isLowBatteryWarningShown = false;
         }
+        return false;
     }
 
-    private void checkRangeWarning() {
-        float range = currentStatus.getRangeStatus();
-        if (range < EvSafeServiceConstants.VehicleStatus.LOW_RANGE_THRESHOLD_KM 
-            && !isLowRangeWarningShown) {
-            isLowRangeWarningShown = true;
-            notificationHelper.showWarningNotification(
-                "Low Range Warning",
-                String.format("Estimated range: %.1f km", range));
-        } else if (range >= EvSafeServiceConstants.VehicleStatus.LOW_RANGE_THRESHOLD_KM) {
-            isLowRangeWarningShown = false;
+    private float convertSpeedLevel(Float speedValue) {
+        if (speedValue == null) {
+            throw new IllegalArgumentException("Speed value cannot be null");
         }
+        return speedValue * EvSafeServiceConstants.Speed.SPEED_TO_KMH_MULTIPLIER;
     }
 
     private String convertGearToString(int gearValue) {
@@ -179,10 +250,6 @@ public class EvSafeServiceVehiclePropertyHandler {
         }
     }
 
-    private float calculateBatteryPercentage(float rawValue) {
-        return (rawValue / getBatteryCapacity()) * EvSafeServiceConstants.Battery.PERCENTAGE_MULTIPLIER;
-    }
-
     private float getBatteryCapacity() {
         try {
             return propertyManager.getFloatProperty(
@@ -193,8 +260,17 @@ public class EvSafeServiceVehiclePropertyHandler {
         }
     }
 
+    private float calculateBatteryPercentage(float rawValue) {
+        float capacity = getBatteryCapacity();
+        if (capacity <= 0) {
+            Log.w(TAG, "Invalid battery capacity");
+            return EvSafeServiceConstants.Defaults.STATUS_VALUE;
+        }
+        return (rawValue / capacity) * EvSafeServiceConstants.Battery.PERCENTAGE_MULTIPLIER;
+    }
+
     private void updateRangeEstimate(float batteryPercentage) {
-        float speedFactor = calculateSpeedFactor(currentStatus.getSpeedStatus());
+        float speedFactor = calculateSpeedFactor(currentStatus.getspeedLevel());
         float estimatedRange = (batteryPercentage / EvSafeServiceConstants.Battery.PERCENTAGE_MULTIPLIER) 
             * EvSafeServiceConstants.VehicleStatus.MAX_RANGE_KM 
             * speedFactor;

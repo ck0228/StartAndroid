@@ -8,18 +8,22 @@ import java.util.Objects;
 public class EvSafeServiceStatus {
     public static final String TAG = "EvSafeServiceStatus";
     private String gearStatus;
-    private float speedStatus;
+    private float speedLevel;
     private float batteryStatus;
     private float rangeStatus;
+    private float batteryLevel;
+    private boolean isSpeedWarning;
 
     /**
      * Creates a new EvStatus with default values
      */
     public EvSafeServiceStatus() {
         this.gearStatus = EvSafeServiceConstants.Defaults.GEAR_STATUS;
-        this.speedStatus = EvSafeServiceConstants.Defaults.STATUS_VALUE;
+        this.speedLevel = EvSafeServiceConstants.Defaults.STATUS_VALUE;
         this.batteryStatus = EvSafeServiceConstants.Defaults.STATUS_VALUE;
-        this.rangeStatus = EvSafeServiceConstants.Defaults.STATUS_VALUE;
+        this.rangeStatus = EvSafeServiceConstants.VehicleStatus.MAX_RANGE_KM;
+        this.batteryLevel = EvSafeServiceConstants.Defaults.STATUS_VALUE;
+        this.isSpeedWarning = false;
     }
 
     /**
@@ -30,9 +34,11 @@ public class EvSafeServiceStatus {
     public EvSafeServiceStatus(EvSafeServiceStatus other) {
         Objects.requireNonNull(other, "Source EvStatus cannot be null");
         this.gearStatus = other.gearStatus;
-        this.speedStatus = other.speedStatus;
+        this.speedLevel = other.speedLevel;
         this.batteryStatus = other.batteryStatus;
         this.rangeStatus = other.rangeStatus;
+        this.batteryLevel = other.batteryLevel;
+        this.isSpeedWarning = other.isSpeedWarning;
     }
 
     /**
@@ -45,8 +51,8 @@ public class EvSafeServiceStatus {
     /**
      * @return Current speed in km/h
      */
-    public float getSpeedStatus() {
-        return speedStatus;
+    public float getspeedLevel() {
+        return speedLevel;
     }
 
     /**
@@ -64,6 +70,20 @@ public class EvSafeServiceStatus {
     }
 
     /**
+     * @return Current battery level
+     */
+    public float getBatteryLevel() {
+        return batteryLevel;
+    }
+
+    /**
+     * @return Current speed warning status
+     */
+    public boolean getSpeedWarning() {
+        return isSpeedWarning;
+    }
+
+    /**
      * Sets the gear status
      * @param gearStatus The new gear status
      * @throws NullPointerException if gearStatus is null
@@ -74,14 +94,22 @@ public class EvSafeServiceStatus {
 
     /**
      * Sets the vehicle speed
-     * @param speedStatus Speed in km/h
+     * @param speedLevel Speed in km/h
      * @throws IllegalArgumentException if speed is negative
      */
-    public void setSpeedStatus(float speedStatus) {
-        if (speedStatus < 0) {
+    public void setspeedLevel(float speedLevel) {
+        if (speedLevel < 0) {
             throw new IllegalArgumentException("Speed cannot be negative");
         }
-        this.speedStatus = speedStatus;
+        this.speedLevel = speedLevel;
+    }
+
+    /**
+     * Sets the speed warning status
+     * @param isWarning New warning status
+     */
+    public void setSpeedWarning(boolean isWarning) {
+        this.isSpeedWarning = isWarning;
     }
 
     /**
@@ -110,30 +138,35 @@ public class EvSafeServiceStatus {
         this.rangeStatus = rangeStatus;
     }
 
+    /**
+     * Sets the battery level
+     * @param batteryLevel Battery level value
+     * @throws IllegalArgumentException if not in valid range
+     */
+    public void setBatteryLevel(float batteryLevel) {
+        if (batteryLevel < 0) {
+            throw new IllegalArgumentException(
+                String.format("Battery level must be bigger then 0"));
+        }
+        this.batteryLevel = batteryLevel;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         EvSafeServiceStatus evsStatus = (EvSafeServiceStatus) o;
-        return Float.compare(evsStatus.speedStatus, speedStatus) == 0 &&
+        return Float.compare(evsStatus.speedLevel, speedLevel) == 0 &&
                 Float.compare(evsStatus.batteryStatus, batteryStatus) == 0 &&
                 Float.compare(evsStatus.rangeStatus, rangeStatus) == 0 &&
+                Float.compare(evsStatus.batteryLevel, batteryLevel) == 0 &&
+                evsStatus.isSpeedWarning == isSpeedWarning &&
                 Objects.equals(gearStatus, evsStatus.gearStatus);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(gearStatus, speedStatus, batteryStatus, rangeStatus);
-    }
-
-    @Override
-    public String toString() {
-        return String.format(
-            "Status{gear=%s, speed=%.1f, battery=%.1f%%, range=%.1f}",
-            gearStatus,
-            speedStatus,
-            batteryStatus,
-            rangeStatus
-        );
+        return Objects.hash(gearStatus, speedLevel, batteryStatus, 
+                          rangeStatus, batteryLevel, isSpeedWarning);
     }
 }

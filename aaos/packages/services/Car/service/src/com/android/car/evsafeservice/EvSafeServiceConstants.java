@@ -19,10 +19,8 @@ public final class EvSafeServiceConstants {
     
     /** Notification related constants */
     public static final class Notification {
-        public static final String SERVICE_CHANNEL_ID = "EvSafeServiceChannel";
         public static final String WARNING_CHANNEL_ID = "EvSafeWarningChannel";
-        public static final int SERVICE_NOTIFICATION_ID = 1;
-        public static final int WARNING_NOTIFICATION_ID = 2;
+        public static final int WARNING_NOTIFICATION_ID = 1;
     }
 
     /** Battery related constants */
@@ -39,6 +37,7 @@ public final class EvSafeServiceConstants {
         public static final float SPEED_FACTOR_MULTIPLIER = 0.0045f;
         public static final float MIN_SPEED_FACTOR = 0.1f;
         public static final float SPEED_TO_KMH_MULTIPLIER = 3.6f;
+        public static final float SPEED_WARNING_THRESHOLD = 100.0f;
     }
 
     /** Vehicle status thresholds and limits */
@@ -48,9 +47,17 @@ public final class EvSafeServiceConstants {
         public static final float LOW_RANGE_THRESHOLD_KM = 100.0f;
     }
 
+    /** Sensor sampling rate constants */
+    public static final class SensorRate {
+        private SensorRate() {}
+        // 1Hz sampling rate for both speed and battery
+        public static final float SPEED_SAMPLE_RATE = 1.0f;  // CarPropertyManager.SENSOR_RATE_NORMAL
+        public static final float BATTERY_SAMPLE_RATE = 1.0f; // CarPropertyManager.SENSOR_RATE_NORMAL
+    }
+
     /** Default values */
     public static final class Defaults {
         public static final String GEAR_STATUS = "Unknown";
         public static final float STATUS_VALUE = 0.0f;
-    }    
+    } 
 }

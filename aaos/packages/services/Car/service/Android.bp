@@ -62,12 +62,12 @@ common_lib_deps = [
 android_app {
     name: "CarService",
 
-//####################################################################################
-//  원래는 이거만 srcs: car_service_sources
-//################################################################
+//######################## ㄴ기존 ######################################################
+//    srcs: car_service_sources,
     srcs: car_service_sources + [
         "src/com/android/car/evsafeservice/*.java",
-    ],
+   ],
+
 
     resource_dirs: ["res"],
 
@@ -87,7 +87,6 @@ android_app {
     static_libs: common_lib_deps + [
         "com.android.car.internal.system",
         "android.car", // ######### added
-//        "android.car.propertyservice", // ########### added
     ],
 
     jni_libs: [

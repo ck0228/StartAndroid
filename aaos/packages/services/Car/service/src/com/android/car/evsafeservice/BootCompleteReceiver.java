@@ -2,6 +2,7 @@
 
 package com.android.car.evsafeservice;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,16 +19,35 @@ public class BootCompleteReceiver extends BroadcastReceiver {
         }
 
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
-            Log.d(TAG, "Boot completed event received");
-            startEvSafeService(context);
+            synchronized (BootCompleteReceiver.class) {
+                if (isServiceRunning(context)) {
+                    Log.d(TAG, "Service already running, ignoring boot completed event");
+                    return;
+                }
+                Log.d(TAG, "1. Boot completed event received");
+                startEvSafeService(context);
+            }
         }
+    }
+
+    private boolean isServiceRunning(Context context) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (manager != null) {
+            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+                if (EvSafeService.class.getName().equals(service.service.getClassName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void startEvSafeService(Context context) {
         try {
             Intent serviceIntent = new Intent(context, EvSafeService.class);
-            Log.d(TAG, "Starting foreground service");
-            context.startForegroundService(serviceIntent);
+            serviceIntent.setFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+            Log.d(TAG, "2. Starting system service");
+            context.startService(serviceIntent);
         } catch (Exception e) {
             Log.e(TAG, "Failed to start EvSafeService", e);
         }

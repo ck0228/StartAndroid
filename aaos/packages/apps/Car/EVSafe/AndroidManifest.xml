@@ -1,0 +1,42 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.evsafe">
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+
+    <uses-feature 
+        android:name="android.hardware.type.automotive" 
+        android:required="true" />
+
+    <application
+        android:label="EVSafe"
+        android:icon="@mipmap/ic_launcher"
+        android:theme="@android:style/Theme.DeviceDefault"
+        android:directBootAware="true">
+
+        <!-- Add service binding category -->
+        <meta-data 
+            android:name="android.car.application"
+            android:value="true" />
+
+        <!-- Main Activity --> 
+        <activity android:name=".MainActivity"                     
+                android:exported="true" 
+                android:label="@string/app_name"
+            android:screenOrientation="landscape"> <!-- apk설치 위한 속성 exported -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <receiver 
+            android:name=".MainActivity$StatusReceiver"
+            android:exported="true"
+            android:singleUser="true">
+            <intent-filter>
+                <action android:name="com.android.car.evsafeservice.ACTION_STATUS_UPDATE" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>
