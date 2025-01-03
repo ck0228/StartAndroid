@@ -46,6 +46,8 @@
 ------------------------------------
 ### STEP 6 (Additional)
 - [ ] Study BluePrint and Manifest files
+- [ ] Broadcast only when Statuses are changed in EvSafeService
+- [ ] Broadcast statuses seperately
 
 
 
