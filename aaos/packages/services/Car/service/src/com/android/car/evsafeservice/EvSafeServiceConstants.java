@@ -7,8 +7,11 @@ package com.android.car.evsafeservice;
 
 import android.car.VehicleGear;
 import android.car.VehiclePropertyIds;
-import java.util.Objects;
 
+/**
+ * Constants and utilities for EV Safe Service.
+ * Provides centralized access to configuration values and thresholds.
+ */
 public final class EvSafeServiceConstants {
     private EvSafeServiceConstants() {
         throw new AssertionError("No instances");
@@ -19,8 +22,12 @@ public final class EvSafeServiceConstants {
     
     /** Notification related constants */
     public static final class Notification {
+        private Notification() {}
+        
         public static final String WARNING_CHANNEL_ID = "EvSafeWarningChannel";
         public static final int WARNING_NOTIFICATION_ID = 1;
+        public static final String TITLE = "EV Safety Warning";
+        public static final String DESCRIPTION = "Vehicle status warning";
     }
 
     /** Battery related constants */
@@ -42,6 +49,7 @@ public final class EvSafeServiceConstants {
 
     /** Vehicle status thresholds and limits */
     public static final class VehicleStatus {
+        private VehicleStatus() {}
         public static final float MAX_RANGE_KM = 450.0f;
         public static final float LOW_BATTERY_THRESHOLD_PERCENT = 20.0f;
         public static final float LOW_RANGE_THRESHOLD_KM = 100.0f;

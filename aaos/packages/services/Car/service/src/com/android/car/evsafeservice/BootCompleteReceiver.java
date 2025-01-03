@@ -8,25 +8,33 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+/**
+ * BroadcastReceiver that starts EvSafeService when device boot completes.
+ * Ensures only one instance of the service is running.
+ */
 public class BootCompleteReceiver extends BroadcastReceiver {
     private static final String TAG = "BootCompleteReceiver_EvSafeService";
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (context == null || intent == null || intent.getAction() == null) {
-            Log.w(TAG, "Received null context, intent or action");
-            return;
-        }
-
-        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
-            synchronized (BootCompleteReceiver.class) {
-                if (isServiceRunning(context)) {
-                    Log.d(TAG, "Service already running, ignoring boot completed event");
-                    return;
-                }
-                Log.d(TAG, "1. Boot completed event received");
-                startEvSafeService(context);
+        try {
+            if (context == null || intent == null || intent.getAction() == null) {
+                Log.w(TAG, "Invalid input received");
+                return;
             }
+
+            if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+                synchronized (BootCompleteReceiver.class) {
+                    if (isServiceRunning(context)) {
+                        Log.d(TAG, "Service already running");
+                        return;
+                    }
+                    Log.d(TAG, "1. Boot completed event received");
+                    startEvSafeService(context);
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error in BootCompleteReceiver", e);
         }
     }
 

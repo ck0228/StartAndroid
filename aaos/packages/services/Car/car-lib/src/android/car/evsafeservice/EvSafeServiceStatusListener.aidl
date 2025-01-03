@@ -1,21 +1,23 @@
-// path: /home/chank/aaos/packages/services/Car/car-lib/src/android/car/evsafeservice/
-
+// path: src/android/car/evsafeservice/EvSafeServiceStatusListener.aidl
 package android.car.evsafeservice;
+
+import android.car.evsafeservice.EvSafeServiceStatusData;
 
 interface EvSafeServiceStatusListener {
     /**
      * Called when vehicle status changes.
-     * @param batteryStatus Current battery percentage (0-100)
-     * @param batteryLevel Raw battery level value
-     * @param rangeStatus Estimated range in kilometers
-     * @param speedLevel Current speed in km/h
-     * @param gearStatus Current gear position (P,R,N,D)
-     * @param speedWarning Whether speed warning is active
+     * All status updates are delivered asynchronously.
+     * 
+     * @param status Bundle containing all vehicle status information
+     * @throws RemoteException if communication fails
      */
-    oneway void onStatusChanged(float batteryStatus, 
-                              float batteryLevel,
-                              float rangeStatus, 
-                              float speedLevel,
-                              String gearStatus, 
-                              boolean speedWarning);
+    oneway void onStatusChanged(in EvSafeServiceStatusData status);
+
+    /**
+     * Called when an error occurs during status monitoring.
+     * 
+     * @param errorCode Error code indicating failure reason
+     * @param message Detailed error description
+     */
+    oneway void onError(int errorCode, String message);
 }

@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.evsafe">
 
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS"/>
+    <uses-permission android:name="com.android.car.evsafeservice.permission.RECEIVE_STATUS_UPDATE" />
 
     <uses-feature 
         android:name="android.hardware.type.automotive" 
@@ -12,9 +12,9 @@
         android:label="EVSafe"
         android:icon="@mipmap/ic_launcher"
         android:theme="@android:style/Theme.DeviceDefault"
-        android:directBootAware="true">
+        android:directBootAware="true"
+        android:singleUser="true">
 
-        <!-- Add service binding category -->
         <meta-data 
             android:name="android.car.application"
             android:value="true" />
@@ -31,10 +31,10 @@
         </activity>
 
         <receiver 
-            android:name=".MainActivity$StatusReceiver"
+            android:name=".StatusReceiver"
             android:exported="true"
-            android:singleUser="true">
-            <intent-filter>
+            android:permission="com.android.car.evsafeservice.permission.RECEIVE_STATUS_UPDATE">
+           <intent-filter>
                 <action android:name="com.android.car.evsafeservice.ACTION_STATUS_UPDATE" />
             </intent-filter>
         </receiver>

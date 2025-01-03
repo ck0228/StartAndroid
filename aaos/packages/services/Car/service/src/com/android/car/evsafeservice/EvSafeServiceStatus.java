@@ -7,6 +7,7 @@ import java.util.Objects;
  */
 public class EvSafeServiceStatus {
     public static final String TAG = "EvSafeServiceStatus";
+
     private String gearStatus;
     private float speedLevel;
     private float batteryStatus;
@@ -21,6 +22,7 @@ public class EvSafeServiceStatus {
         this.gearStatus = EvSafeServiceConstants.Defaults.GEAR_STATUS;
         this.speedLevel = EvSafeServiceConstants.Defaults.STATUS_VALUE;
         this.batteryStatus = EvSafeServiceConstants.Defaults.STATUS_VALUE;
+        this.batteryLevel = EvSafeServiceConstants.Defaults.STATUS_VALUE;
         this.rangeStatus = EvSafeServiceConstants.VehicleStatus.MAX_RANGE_KM;
         this.batteryLevel = EvSafeServiceConstants.Defaults.STATUS_VALUE;
         this.isSpeedWarning = false;
@@ -36,6 +38,7 @@ public class EvSafeServiceStatus {
         this.gearStatus = other.gearStatus;
         this.speedLevel = other.speedLevel;
         this.batteryStatus = other.batteryStatus;
+        this.batteryLevel = other.batteryLevel;
         this.rangeStatus = other.rangeStatus;
         this.batteryLevel = other.batteryLevel;
         this.isSpeedWarning = other.isSpeedWarning;
@@ -51,7 +54,7 @@ public class EvSafeServiceStatus {
     /**
      * @return Current speed in km/h
      */
-    public float getspeedLevel() {
+    public float getSpeedLevel() {
         return speedLevel;
     }
 
@@ -97,7 +100,7 @@ public class EvSafeServiceStatus {
      * @param speedLevel Speed in km/h
      * @throws IllegalArgumentException if speed is negative
      */
-    public void setspeedLevel(float speedLevel) {
+    public void setSpeedLevel(float speedLevel) {
         if (speedLevel < 0) {
             throw new IllegalArgumentException("Speed cannot be negative");
         }
@@ -118,7 +121,8 @@ public class EvSafeServiceStatus {
      * @throws IllegalArgumentException if not in valid range
      */
     public void setBatteryStatus(float batteryStatus) {
-        if (batteryStatus < 0 || batteryStatus > EvSafeServiceConstants.Battery.PERCENTAGE_MULTIPLIER) {
+        if (batteryStatus < EvSafeServiceConstants.Battery.MIN_PERCENTAGE || 
+            batteryStatus > EvSafeServiceConstants.Battery.MAX_PERCENTAGE) {
             throw new IllegalArgumentException("Battery status must be between 0 and 100");
         }
         this.batteryStatus = batteryStatus;
@@ -154,14 +158,14 @@ public class EvSafeServiceStatus {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        EvSafeServiceStatus evsStatus = (EvSafeServiceStatus) o;
-        return Float.compare(evsStatus.speedLevel, speedLevel) == 0 &&
-                Float.compare(evsStatus.batteryStatus, batteryStatus) == 0 &&
-                Float.compare(evsStatus.rangeStatus, rangeStatus) == 0 &&
-                Float.compare(evsStatus.batteryLevel, batteryLevel) == 0 &&
-                evsStatus.isSpeedWarning == isSpeedWarning &&
-                Objects.equals(gearStatus, evsStatus.gearStatus);
+        if (!(o instanceof EvSafeServiceStatus)) return false;
+        EvSafeServiceStatus that = (EvSafeServiceStatus) o;
+        return Float.compare(that.speedLevel, speedLevel) == 0 &&
+               Float.compare(that.batteryStatus, batteryStatus) == 0 &&
+               Float.compare(that.batteryLevel, batteryLevel) == 0 &&
+               Float.compare(that.rangeStatus, rangeStatus) == 0 &&
+               isSpeedWarning == that.isSpeedWarning &&
+               Objects.equals(gearStatus, that.gearStatus);
     }
 
     @Override
