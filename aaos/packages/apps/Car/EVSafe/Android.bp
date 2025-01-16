@@ -7,5 +7,5 @@ android_app {
     static_libs: [
         "android.car",
     ],
-    certificate: "platform",
+    // certificate: "platform", //EvSafeService 통신할때 시스템권한 필요한지 확인
 }

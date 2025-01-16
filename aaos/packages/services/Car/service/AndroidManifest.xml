@@ -892,13 +892,6 @@
                 android:label="@string/car_permission_label_template_renderer"
                 android:description="@string/car_permission_desc_template_renderer"/>
 
-     <!-- Define custom permission for EVSafe status broadcasts -->
-    <protected-broadcast android:name="com.android.car.evsafeservice.ACTION_STATUS_UPDATE" />
-    <permission android:name="com.android.car.evsafeservice.permission.RECEIVE_STATUS_UPDATE"
-                android:protectionLevel="signature|privileged" 
-                android:label="@string/permission_receive_status_label"
-                android:description="@string/permission_receive_status_desc"/>
-
     <uses-permission android:name="android.permission.CALL_PHONE"/>
     <uses-permission android:name="android.permission.DEVICE_POWER"/>
     <uses-permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS"/>
@@ -933,28 +926,25 @@
     <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
     <uses-permission android:name="android.car.permission.CAR_INFO" />
     <uses-permission android:name="android.car.permission.CAR_ENERGY" />
-    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
-    <uses-permission android:name="com.android.car.evsafeservice.permission.RECEIVE_STATUS_UPDATE" />
 
     <application android:label="@string/app_title"
          android:directBootAware="true"
          android:allowBackup="false"
          android:persistent="true">
 
-         <!-- EvSafeService -->
+        <!-- EvSafeService -->
         <service
-            android:name=".evsafeservice.EvSafeService"
-            android:exported="true"
-            android:permission="com.android.car.evsafeservice.permission.RECEIVE_STATUS_UPDATE"
-            android:singleUser="true"
-            android:process=":system">
+            android:name="com.android.car.evsafeservice.EvSafeService"
+            android:exported="true">
+             <intent-filter>
+                <action android:name="com.example.evsafe.BIND_EV_SAFE_SERVICE" />
+                <category android:name="android.intent.category.DEFAULT" />
+             </intent-filter>
         </service>
 
         <!-- BootCompleteReceiver -->
         <receiver android:name=".evsafeservice.BootCompleteReceiver"
             android:exported="true"
-            android:permission="com.android.car.evsafeservice.permission.RECEIVE_STATUS_UPDATE"
-            android:singleUser="true"
             android:directBootAware="true">
              <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

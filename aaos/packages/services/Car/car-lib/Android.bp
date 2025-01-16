@@ -90,42 +90,28 @@ java_library {
     ],
 }
 
-// ###################### evsafeservice #####################
+// evsafeservice
 filegroup {
-    name: "evsafeservice_aidl",
+    name: "libevsafeservice_aidl",
     srcs: [
-        "src/android/car/evsafeservice/EvSafeServiceApi.aidl",
-        "src/android/car/evsafeservice/EvSafeServiceStatusListener.aidl",
-        "src/android/car/evsafeservice/EvSafeServiceStatusData.aidl",
+        "src/android/car/evsafeservice/IEvSafeService.aidl",
+        "src/android/car/evsafeservice/IEvSafeServiceCallback.aidl",
     ],
     path: "src",
 }
 
-java_library {
-    name: "android.car.evsafeservice",
+aidl_interface {
+    name: "com.android.car.evsafeservice",
     srcs: [
-        ":evsafeservice_aidl",
+        ":libevsafeservice_aidl",
     ],
-    aidl: {
-        include_dirs: ["packages/services/Car/car-lib/src"],
-        local_include_dirs: ["src"],
-    },
-    product_variables: {
-        pdk: {
-            enabled: false,
+    local_include_dir: "src/android/car/evsafeservice",
+    backend: {
+        java: {
+            enabled: true,
         },
     },
-    platform_apis: true,
-    libs: [
-        "framework",
-        "android.car",
-    ],
-    static_libs: [
-        "com.android.car.internal.common",
-    ],
-    optimize: {
-        enabled: true,
-    },
+    owner: "android.car",
 }
 
 java_library {

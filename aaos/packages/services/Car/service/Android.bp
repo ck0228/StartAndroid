@@ -59,15 +59,13 @@ common_lib_deps = [
     "cartelemetry-protos",
 ]
 
+// evsafeservice 
 android_app {
     name: "CarService",
 
-//######################## ㄴ기존 ######################################################
-//    srcs: car_service_sources,
-    srcs: car_service_sources + [
+    srcs: car_service_sources+ [
         "src/com/android/car/evsafeservice/*.java",
    ],
-
 
     resource_dirs: ["res"],
 
@@ -86,7 +84,7 @@ android_app {
 
     static_libs: common_lib_deps + [
         "com.android.car.internal.system",
-        "android.car", // ######### added
+        "android.car",
     ],
 
     jni_libs: [

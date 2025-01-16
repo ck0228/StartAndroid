@@ -7,44 +7,39 @@ actor System
 participant BootCompleteReceiver
 participant Context
 participant EvSafeService
-participant Car
+participant EvSafeServiceNotificationHelper
 participant CarPropertyManager
-participant EVSStatus
-participant EVSVehiclePropertyHandler
-participant EVSNotificationHelper
+participant EvSafeServiceData
+participant EvSafeServiceDataManager
 
 System -> BootCompleteReceiver: BOOT_COMPLETED
 BootCompleteReceiver -> BootCompleteReceiver: onReceive()
 BootCompleteReceiver -> Context: startService(Intent)
 Context -> EvSafeService: onCreate()
-note over EvSafeService: initialize Components
-EvSafeService -> Car: createCar()
-Car -> CarPropertyManager: getCarManager()
-CarPropertyManager -> EvSafeService: CarPropertyManager instance
-EvSafeService -> EVSStatus: new EvSafeServiceStatus()
-EvSafeService -> EVSVehiclePropertyHandler: new EvSafeServiceVehiclePropertyHandler()
-EvSafeService -> EVSNotificationHelper: new EvSafeServiceNotificationHelper()
+EvSafeServiceNotificationHelper -> EvSafeService : new EvSafeServiceNotificationHelper()
+CarPropertyManager -> EvSafeService: new CarPropertyManager()
+EvSafeServiceData -> EvSafeService: new EvSafeServiceData()
+
+EvSafeService -> EvSafeServiceDataManager: new EvSafeServiceDataManager(CarPropertyManager, EvSafeServiceData, EvSafeServiceDataUpdateListener)
+EvSafeService -> EvSafeServiceDataManager: registerListeners()
 
 Context -> EvSafeService: onStartCommand()
 note over EvSafeService: Start service operations
-EvSafeService -> EVSVehiclePropertyHandler: registerListeners()
-EVSVehiclePropertyHandler -> CarPropertyManager: registerCallback(propertyEventCallback)
 
-loop Property Event Callback
-    CarPropertyManager -> EVSVehiclePropertyHandler: onChangeEvent(CarPropertyValue)
-    EVSVehiclePropertyHandler -> EVSVehiclePropertyHandler: handlePropertyChange()
-    note over EVSVehiclePropertyHandler: Handle property change
-    EVSVehiclePropertyHandler -> CarPropertyManager: CarPropertyValue.getValue()
-    EVSVehiclePropertyHandler -> EVSStatus: EVSStatus.setValue()
-    EVSVehiclePropertyHandler -> EVSNotificationHelper: showWarningNotification()
-    EVSVehiclePropertyHandler -> EvSafeService: Broadcast flag update
-    note over EvSafeService: Broadcast status updates
-    EvSafeService -> Context: sendBroadcast()
+EvSafeServiceDataManager -> CarPropertyManager: registerCallback(propertyEventCallback)
+
+loop Main Event
+    CarPropertyManager -> EvSafeServiceDataManager: onChangeEvent(CarPropertyValue)
+    activate EvSafeServiceDataManager
+    EvSafeServiceDataManager -> EvSafeServiceDataManager: handlePropertyChange()
+    note over EvSafeServiceDataManager: if propoerty is changed
+    EvSafeServiceDataManager -> EvSafeServiceData: EvSafeServiceData.setValue()
+    EvSafeServiceDataManager -> EvSafeServiceNotificationHelper: showWarningNotification()
+    EvSafeServiceDataManager -> EvSafeService: EvSafeServiceDataUpdateListener.onEvSafeServiceDataUpdated()
+    deactivate EvSafeServiceDataManager
+    activate EVSafe_app
+    EvSafeService -> EVSafe_app: EvSafeServiceDataUpdateListener.onEvSafeServiceDataUpdated()
+    EVSafe_app -> EVSafe_app: updateUI()
+    deactivate EVSafe_app
 end
-Context -> EvSafeService_API: onStatusChanged()
-activate EVSafe_app
-EvSafeService_API -> EVSafe_app: onReceive()
-EVSafe_app -> EVSafe_app: updateUI()
-deactivate EVSafe_app
-
 @enduml

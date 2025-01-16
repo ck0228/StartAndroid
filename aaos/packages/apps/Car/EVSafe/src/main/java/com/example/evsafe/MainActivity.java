@@ -1,238 +1,158 @@
 package com.example.evsafe;
 
+// Android core
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
+import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
+
+// Android widgets
 import android.widget.TextView;
-import android.widget.Toast;
+
+import android.car.evsafeservice.IEvSafeService;
+import android.car.evsafeservice.IEvSafeServiceCallback;
 
 public class MainActivity extends Activity {
-    private static final String TAG = "MainActivity_EVSafe";
-    static final String ACTION_STATUS_UPDATE = "com.android.car.evsafeservice.ACTION_STATUS_UPDATE";
-    static final String PERMISSION_RECEIVE_STATUS = "com.android.car.evsafeservice.permission.RECEIVE_STATUS_UPDATE";
+    private static final String TAG = "MainActivity_EvSafe";
+    private static final String ACTION_EV_STATUS_UPDATE = "com.android.car.evsafeservice.ACTION_STATUS_UPDATE";
 
-    private static final class Extras {
-        static final String BATTERY_STATUS = "batteryStatus";
-        static final String BATTERY_LEVEL = "batteryLevel";
-        static final String RANGE_STATUS = "rangeStatus";
-        static final String SPEED_LEVEL = "speedLevel";
-        static final String GEAR_STATUS = "gearStatus";
-        static final String SPEED_WARNING = "speedWarning";
-    }
-
+    // UI elements
     private TextView gearText;
     private TextView batteryText;
     private TextView speedText;
     private TextView rangeText;
-    
-    private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    private boolean isReceiverRegistered = false;
-    private StatusReceiver statusReceiver;
+
+    private IEvSafeService evSafeService;
+
+    private final IEvSafeServiceCallback.Stub callback = new IEvSafeServiceCallback.Stub() {
+        @Override
+        public void onSpeedChanged(int speed) {
+            runOnUiThread(() -> updateSpeed(speed));
+        }
+
+        @Override
+        public void onBatteryChanged(int batteryStatus) {
+            runOnUiThread(() -> updateBattery(batteryStatus));
+        }
+
+        @Override
+        public void onGearChanged(String gear) {
+            runOnUiThread(() -> updateGear(gear));
+        }
+
+        @Override
+        public void onRangeChanged(int range) {
+            runOnUiThread(() -> updateRange(range));
+        }
+
+        @Override
+        public void onEvSafeServiceEvent(int eventType, Bundle eventData) {
+            // Handle other events if needed
+        }
+    };
+
+    private final ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            evSafeService = IEvSafeService.Stub.asInterface(service);
+            try {
+                evSafeService.registerCallback(callback);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to register callback", e);
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            evSafeService = null;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate called");
         setContentView(R.layout.activity_main);
-        
-        Log.d(TAG, "onCreate: Starting activity initialization");
         initializeViews();
-        checkAndRequestPermissions();
+
+        Intent bindIntent = new Intent();
+        bindIntent.setAction("com.example.evsafe.BIND_EV_SAFE_SERVICE");
+        bindIntent.setComponent(new ComponentName(
+            "com.android.car",
+            "com.android.car.evsafeservice.EvSafeService"
+        ));
         
-        // Initialize receiver
-        statusReceiver = new StatusReceiver();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        registerStatusReceiver();
-        sendTestBroadcast();
-    }
-
-    @Override
-    protected void onPause() {
-        unregisterStatusReceiver();
-        super.onPause();
-    }
-
-    // Called by StatusReceiver
-    void handleStatusUpdate(Intent intent) {
-        try {
-            VehicleStatus status = extractVehicleStatus(intent);
-            updateUI(status);
-            Log.d(TAG, "Status update processed: " + status);
-        } catch (Exception e) {
-            Log.e(TAG, "Error processing status update", e);
-            showError("Failed to process vehicle status");
-        }
+        bindService(bindIntent, connection, Context.BIND_AUTO_CREATE);
+        Log.d(TAG, "Activity setup completed");
     }
 
     private void initializeViews() {
-        try {
-            gearText = findViewById(R.id.gear_text);
-            batteryText = findViewById(R.id.battery_text);
-            speedText = findViewById(R.id.speed_text);
-            rangeText = findViewById(R.id.range_text);
-            
-            validateViews();
-            
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to initialize views", e);
-            showError("Failed to initialize views");
-        }
-    }
-
-    private void validateViews() {
-        if (gearText == null || batteryText == null || 
-            speedText == null || rangeText == null) {
-            throw new IllegalStateException("Required views not found");
-        }
-    }
-
-    private void checkAndRequestPermissions() {
-        if (checkSelfPermission(PERMISSION_RECEIVE_STATUS) != PackageManager.PERMISSION_GRANTED) {
-            Log.w(TAG, "Required permission not granted");
-            showError("Missing required permissions");
-            finish();
-        }
-    }
-
-    private void registerStatusReceiver() {
-        if (!isReceiverRegistered) {
-            try {
-                IntentFilter filter = new IntentFilter(ACTION_STATUS_UPDATE);
-                registerReceiver(statusReceiver, filter, PERMISSION_RECEIVE_STATUS, null);
-                isReceiverRegistered = true;
-                Log.d(TAG, "Status receiver registered successfully");
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to register receiver", e);
-                showError("Failed to initialize status monitoring");
-            }
-        }
-    }
-
-    private void unregisterStatusReceiver() {
-        if (isReceiverRegistered) {
-            try {
-                unregisterReceiver(statusReceiver);
-                isReceiverRegistered = false;
-                Log.d(TAG, "Status receiver unregistered");
-            } catch (Exception e) {
-                Log.e(TAG, "Error unregistering receiver", e);
-            }
-        }
-    }
-
-    private boolean validateBroadcast(Intent intent) {
-        if (intent == null || intent.getAction() == null) {
-            Log.w(TAG, "Received invalid broadcast");
-            return false;
-        }
+        Log.d(TAG, "Initializing views");
+        gearText = findViewById(R.id.gear_text);
+        Log.d(TAG, "gearText found: " + (gearText != null));
         
-        if (!ACTION_STATUS_UPDATE.equals(intent.getAction())) {
-            Log.d(TAG, "Ignoring unrelated broadcast: " + intent.getAction());
-            return false;
-        }
+        batteryText = findViewById(R.id.battery_text);
+        Log.d(TAG, "batteryText found: " + (batteryText != null));
         
-        return true;
+        speedText = findViewById(R.id.speed_text);
+        Log.d(TAG, "speedText found: " + (speedText != null));
+        
+        rangeText = findViewById(R.id.range_text);
+        Log.d(TAG, "rangeText found: " + (rangeText != null));
+        
+        Log.d(TAG, "Views initialization completed");
     }
 
-    private void processStatusUpdate(Intent intent) {
-        try {
-            VehicleStatus status = extractVehicleStatus(intent);
-            updateUI(status);
-            Log.d(TAG, "Status update processed: " + status);
-        } catch (Exception e) {
-            Log.e(TAG, "Error processing status update", e);
-            showError("Failed to process vehicle status");
-        }
-    }
-
-    private VehicleStatus extractVehicleStatus(Intent intent) {
-        return new VehicleStatus(
-            intent.getFloatExtra(Extras.BATTERY_STATUS, 0f),
-            intent.getFloatExtra(Extras.BATTERY_LEVEL, 0f),
-            intent.getFloatExtra(Extras.RANGE_STATUS, 0f),
-            intent.getFloatExtra(Extras.SPEED_LEVEL, 0f),
-            intent.getStringExtra(Extras.GEAR_STATUS),
-            intent.getBooleanExtra(Extras.SPEED_WARNING, false)
-        );
-    }
-
-    private void updateUI(final VehicleStatus status) {
-        mainHandler.post(() -> {
+    @Override
+    protected void onDestroy() {
+        Log.d(TAG, "onDestroy called");
+        if (evSafeService != null) {
             try {
-                gearText.setText(String.format("Gear: %s", status.gearStatus));
-                batteryText.setText(String.format("Battery: %.0f%%", status.batteryStatus));
-                speedText.setText(String.format("Speed: %.0f km/h", status.speedLevel));
-                rangeText.setText(String.format("Range: %.0f km", status.rangeStatus));
-            } catch (Exception e) {
-                Log.e(TAG, "Error updating UI", e);
-                showError("Failed to update display");
+                evSafeService.unregisterCallback(callback);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to unregister callback", e);
             }
-        });
-    }
-
-    private void showError(final String message) {
-        mainHandler.post(() -> 
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-        );
-    }
-
-    private void sendTestBroadcast() {
-        Intent testIntent = new Intent(ACTION_STATUS_UPDATE)
-            .putExtra(Extras.BATTERY_STATUS, 75.0f)
-            .putExtra(Extras.BATTERY_LEVEL, 150000.0f)
-            .putExtra(Extras.RANGE_STATUS, 300.0f)
-            .putExtra(Extras.SPEED_LEVEL, 0.0f)
-            .putExtra(Extras.GEAR_STATUS, "P")
-            .putExtra(Extras.SPEED_WARNING, false);
-            
-        sendBroadcast(testIntent, PERMISSION_RECEIVE_STATUS);
-        Log.d(TAG, "Test broadcast sent");
-    }
-
-    private static class VehicleStatus {
-        final float batteryStatus;
-        final float batteryLevel;
-        final float rangeStatus;
-        final float speedLevel;
-        final String gearStatus;
-        final boolean speedWarning;
-
-        VehicleStatus(float batteryStatus, float batteryLevel, 
-                     float rangeStatus, float speedLevel,
-                     String gearStatus, boolean speedWarning) {
-            this.batteryStatus = batteryStatus;
-            this.batteryLevel = batteryLevel;
-            this.rangeStatus = rangeStatus;
-            this.speedLevel = speedLevel;
-            this.gearStatus = gearStatus != null ? gearStatus : "Unknown";
-            this.speedWarning = speedWarning;
         }
+        unbindService(connection);
+        super.onDestroy();
+    }
 
-        @Override
-        public String toString() {
-            return String.format("Status[battery=%.1f%%, range=%.1fkm, speed=%.1fkm/h, gear=%s]",
-                batteryStatus, rangeStatus, speedLevel, gearStatus);
+    private void updateSpeed(int speed) {
+        if (speedText != null) {
+            String text = String.format("Speed: %d km/h", speed);
+            speedText.setText(text);
+            Log.d(TAG, "updateSpeed - Set speed text: " + text);
         }
     }
 
-    private class StatusReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (!validateBroadcast(intent)) {
-                return;
-            }
-            
-            handleStatusUpdate(intent);
+    private void updateBattery(int batteryStatus) {
+        if (batteryText != null) {
+            String text = String.format("Battery: %d%%", batteryStatus);
+            batteryText.setText(text);
+            Log.d(TAG, "updateBattery - Set battery text: " + text);
+        }
+    }
+
+    private void updateGear(String gear) {
+        if (gearText != null) {
+            String text = "Gear: " + gear;
+            gearText.setText(text);
+            Log.d(TAG, "updateGear - Set gear text: " + text);
+        }
+    }
+
+    private void updateRange(int range) {
+        if (rangeText != null) {
+            String text = String.format("Range: %d km", range);
+            rangeText.setText(text);
+            Log.d(TAG, "updateRange - Set range text: " + text);
         }
     }
 }

@@ -8,33 +8,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-/**
- * BroadcastReceiver that starts EvSafeService when device boot completes.
- * Ensures only one instance of the service is running.
- */
 public class BootCompleteReceiver extends BroadcastReceiver {
     private static final String TAG = "BootCompleteReceiver_EvSafeService";
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        try {
-            if (context == null || intent == null || intent.getAction() == null) {
-                Log.w(TAG, "Invalid input received");
-                return;
-            }
+        if (context == null || intent == null || intent.getAction() == null) {
+            Log.w(TAG, "Received null context, intent or action");
+            return;
+        }
 
-            if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
-                synchronized (BootCompleteReceiver.class) {
-                    if (isServiceRunning(context)) {
-                        Log.d(TAG, "Service already running");
-                        return;
-                    }
-                    Log.d(TAG, "1. Boot completed event received");
-                    startEvSafeService(context);
+        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+            synchronized (BootCompleteReceiver.class) {
+                if (isServiceRunning(context)) {
+                    Log.d(TAG, "Service already running, ignoring boot completed event");
+                    return;
                 }
+                Log.d(TAG, "1. Boot completed event received");
+                startEvSafeService(context);
             }
-        } catch (Exception e) {
-            Log.e(TAG, "Error in BootCompleteReceiver", e);
         }
     }
 
@@ -53,6 +45,7 @@ public class BootCompleteReceiver extends BroadcastReceiver {
     private void startEvSafeService(Context context) {
         try {
             Intent serviceIntent = new Intent(context, EvSafeService.class);
+            serviceIntent.setAction("evsafeservice.BIND_EV_SAFE_SERVICE");
             serviceIntent.setFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
             Log.d(TAG, "2. Starting system service");
             context.startService(serviceIntent);
