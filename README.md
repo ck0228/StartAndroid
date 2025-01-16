@@ -81,17 +81,13 @@
 
 ----
 # ADBS
-- 배터리 용량 설정 (kWh)
-```
-adb shell cmd car_service vehicle-hal-property-set --property 0x15450 --area 0x0 --float 75.0
-```
 - 현재 배터리 잔량 설정 (kWh)
 ```
-adb shell cmd car_service vehicle-hal-property-set --property 0x15451 --area 0x0 --float 50.0
+adb shell cmd car_service inject-vhal-event 0x11600309 0x1 50000
 ```
 - 속도 설정 (km/h)
 ```
-adb shell cmd car_service vehicle-hal-property-set --property 0x11600 --area 0x0 --float 60.0
+adb shell cmd car_service inject-vhal-event 0x11600207 0x1 60
 ```
 
 - 기어 설정 
@@ -100,5 +96,5 @@ adb shell cmd car_service vehicle-hal-property-set --property 0x11600 --area 0x0
 - GEAR_PARK = 4
 - GEAR_DRIVE = 8
 ```
-adb shell cmd car_service vehicle-hal-property-set --property 0x11400 --area 0x0 --int32 8
+adb shell cmd car_service inject-vhal-event 0x11400400 0x1 4
 ```
