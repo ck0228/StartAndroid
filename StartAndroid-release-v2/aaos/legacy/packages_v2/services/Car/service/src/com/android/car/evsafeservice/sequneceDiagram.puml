@@ -1,0 +1,50 @@
+@startuml
+title EvSafeService Sequence Diagram
+
+participant EVSafe_app
+participant EvSafeService_API
+actor System
+participant BootCompleteReceiver
+participant Context
+participant EvSafeService
+participant Car
+participant CarPropertyManager
+participant EVSStatus
+participant EVSVehiclePropertyHandler
+participant EVSNotificationHelper
+
+System -> BootCompleteReceiver: BOOT_COMPLETED
+BootCompleteReceiver -> BootCompleteReceiver: onReceive()
+BootCompleteReceiver -> Context: startService(Intent)
+Context -> EvSafeService: onCreate()
+note over EvSafeService: initialize Components
+EvSafeService -> Car: createCar()
+Car -> CarPropertyManager: getCarManager()
+CarPropertyManager -> EvSafeService: CarPropertyManager instance
+EvSafeService -> EVSStatus: new EvSafeServiceStatus()
+EvSafeService -> EVSVehiclePropertyHandler: new EvSafeServiceVehiclePropertyHandler()
+EvSafeService -> EVSNotificationHelper: new EvSafeServiceNotificationHelper()
+
+Context -> EvSafeService: onStartCommand()
+note over EvSafeService: Start service operations
+EvSafeService -> EVSVehiclePropertyHandler: registerListeners()
+EVSVehiclePropertyHandler -> CarPropertyManager: registerCallback(propertyEventCallback)
+
+loop Property Event Callback
+    CarPropertyManager -> EVSVehiclePropertyHandler: onChangeEvent(CarPropertyValue)
+    EVSVehiclePropertyHandler -> EVSVehiclePropertyHandler: handlePropertyChange()
+    note over EVSVehiclePropertyHandler: Handle property change
+    EVSVehiclePropertyHandler -> CarPropertyManager: CarPropertyValue.getValue()
+    EVSVehiclePropertyHandler -> EVSStatus: EVSStatus.setValue()
+    EVSVehiclePropertyHandler -> EVSNotificationHelper: showWarningNotification()
+    EVSVehiclePropertyHandler -> EvSafeService: Broadcast flag update
+    note over EvSafeService: Broadcast status updates
+    EvSafeService -> Context: sendBroadcast()
+end
+Context -> EvSafeService_API: onStatusChanged()
+activate EVSafe_app
+EvSafeService_API -> EVSafe_app: onReceive()
+EVSafe_app -> EVSafe_app: updateUI()
+deactivate EVSafe_app
+
+@enduml

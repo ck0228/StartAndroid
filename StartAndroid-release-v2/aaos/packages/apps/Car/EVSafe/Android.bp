@@ -1,0 +1,11 @@
+android_app {
+    name: "EVSafe",
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+    manifest: "AndroidManifest.xml",
+    platform_apis: true,
+    static_libs: [
+        "android.car",
+    ],
+    // certificate: "platform", //EvSafeService 통신할때 시스템권한 필요한지 확인
+}

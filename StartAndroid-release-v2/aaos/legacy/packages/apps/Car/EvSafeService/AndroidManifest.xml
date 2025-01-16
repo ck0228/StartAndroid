@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.android.car.evsafeservice">
+
+    <!-- Allows us to inject input events (such as KeyEvent and MotionEvent) into the event stream
+         and deliver them. -->
+    <uses-permission android:name="android.permission.INJECT_EVENTS"/>
+    <!-- Allows us to have an overlay to capture touch events. -->
+    <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <!-- Allows us to get the username of the current user. -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
+    <!-- Allows us to read the current activity's metadata for custom nudge actions. -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
+    <!-- Ensures the host app is visible-->
+    <queries>
+        <intent>
+            <action android:name="android.car.template.host.RendererService" />
+        </intent>
+    </queries>
+
+
+    <!-- Core vehicle permissions -->
+    <uses-permission android:name="android.car.permission.CAR_SPEED" />
+    <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
+    <uses-permission android:name="android.car.permission.CAR_INFO" />
+    <uses-permission android:name="android.car.permission.CAR_ENERGY" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
+
+    <!-- Automotive feature requirement -->
+    <uses-feature 
+        android:name="android.hardware.type.automotive" 
+        android:required="true" />
+
+    <application
+        android:allowBackup="true"
+        >
+
+        <!-- Car application metadata -->
+        <meta-data 
+            android:name="android.car.application"
+            android:value="true" />
+
+        <!-- Main Activity to launch EvSafeService -->
+        <!-- app icon 필요시
+        <activity android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher"
+            android:theme="@android:style/Theme.DeviceDefault"
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        -->
+
+        <!-- Main service -->                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+        <service
+            android:name=".EvSafeService"
+            android:directBootAware="true"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.android.car.evsafeservice.EV_SAFE_SERVICE"/>
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name=".BootCompleteReceiver"
+            android:exported="false"
+            android:enabled="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>
