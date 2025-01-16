@@ -17,19 +17,51 @@ package {
 }
 
 filegroup {
-    name: "android.car.cluster.navigation-src",
-    srcs: ["src/android/car/navigation/navigation_state.proto"],
-    visibility: [
-        "//packages/services/Car/car-lib",
-        "//packages/services/Car/service",
+    name: "libcarpowermanager_aidl",
+    srcs: [
+        "src/android/car/ICar.aidl",
+        "src/android/car/hardware/power/CarPowerPolicy.aidl",
+        "src/android/car/hardware/power/CarPowerPolicyFilter.aidl",
+        "src/android/car/hardware/power/ICarPower.aidl",
+        "src/android/car/hardware/power/ICarPowerPolicyListener.aidl",
+        "src/android/car/hardware/power/ICarPowerStateListener.aidl",
     ],
+    path: "src",
 }
 
-// Public protos for CarTelemetryManager clients.
-filegroup {
-    name: "cartelemetryservice-proto-srcs",
+cc_library {
+    name: "libcarpowermanager",
+    vendor_available: true,
+
+    aidl: {
+        export_aidl_headers: true,
+        local_include_dirs: [
+            "src",
+        ],
+    },
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wextra",
+        "-Wno-unused-parameter",
+    ],
+
+    include_dirs: [
+        "packages/services/Car/car-lib/native/include",
+    ],
+
+    shared_libs: [
+        "libbinder",
+        "liblog",
+        "libutils",
+    ],
+
     srcs: [
-        "src/android/car/telemetry/telemetry.proto",
+        ":libcarpowermanager_aidl",
+        "native/CarPowerManager/CarPowerManager.cpp",
+        "native/CarPowerManager/CarPowerPolicy.cpp",
+        "native/CarPowerManager/CarPowerPolicyFilter.cpp",
     ],
 }
 
@@ -38,93 +70,73 @@ java_library {
     proto: {
         type: "lite",
     },
-    sdk_version: "module_current",
-    min_sdk_version: "31",
-    apex_available: [
-        "//apex_available:platform",
-        "com.android.car.framework",
-    ],
     static_libs: ["libprotobuf-java-lite"],
-    srcs: ["src/android/car/navigation/navigation_state.proto"],
+    srcs: ["src/android/car/navigation/navigation_state.proto"]
 }
 
-filegroup {
-    name: "android.car-full-src",
+// library to access settings from CarSettings
+java_library {
+    name: "android.car.settings",
+    srcs: ["src/android/car/settings/CarSettings.java"]
+}
+
+// library to access common constants between carlibrary and system server.
+java_library {
+    name: "com.android.car.internal.common",
+    srcs: [
+        "src/com/android/car/internal/common/**/*.java",
+        "src/com/android/car/internal/common/EventLogTags.logtags",
+        "src/com/android/car/internal/ExcludeFromCodeCoverageGeneratedReport.java",
+    ],
+}
+
+java_library {
+    name: "android.car",
     srcs: [
         "src/**/*.java",
         "src/**/*.aidl",
+        "src/com/android/car/internal/common/EventLogTags.logtags",
     ],
-    visibility: [
-        "//packages/services/Car/car-lib",
-        "//packages/services/Car/car-lib-module",
-        "//packages/services/Car/tests/CarLibHostUnitTest",
+    aidl: {
+        include_dirs: [
+            "system/bt/binder",
+        ],
+    },
+    exclude_srcs: [
+        "src/android/car/storagemonitoring/IoStats.aidl",
+        "src/android/car/storagemonitoring/IoStatsEntry.aidl",
     ],
+    product_variables: {
+        pdk: {
+            enabled: false,
+        },
+    },
+    installable: true,
 }
 
-// EvSafeService
+// evsafeservice
 filegroup {
-    name: "evsafeservice-aidl-srcs",
+    name: "libevsafeservice_aidl",
     srcs: [
         "src/android/car/evsafeservice/IEvSafeService.aidl",
         "src/android/car/evsafeservice/IEvSafeServiceCallback.aidl",
     ],
-    visibility: [
-        "//packages/services/Car/service",
-    ],
+    path: "src",
 }
 
-java_defaults {
-    name: "android.car-defaults",
-    defaults: [
-        "car-framework-aconfig-libraries",
-    ],
+aidl_interface {
+    name: "com.android.car.evsafeservice",
     srcs: [
-        ":android.car-full-src",
+        ":libevsafeservice_aidl",
     ],
-    aidl: {
-        include_dirs: [
-            "packages/modules/Bluetooth/framework/aidl-export",
-        ],
+    local_include_dir: "src/android/car/evsafeservice",
+    backend: {
+        java: {
+            enabled: true,
+        },
     },
-    libs: [
-        "android.car.builtin",
-        "framework-annotations-lib",
-        "framework-wifi",
-        "framework-bluetooth",
-        "framework-location",
-        "modules-utils-preconditions",
-    ],
-    installable: true,
-    // TODO(b/288271411): enable it when car mainline module is supported
-    // min_sdk_version: "33",
-    sdk_version: "module_current",
 }
 
-// evsafeservice-aidl-srcs 추가
-java_library {
-    name: "android.car",
-    defaults: [
-        "android.car-defaults",
-    ],
-    static_libs: [
-        "com.android.car.internal.dep",
-    ],
-    srcs: [
-        ":evsafeservice-aidl-srcs",
-    ],
-}
-
-// TODO(b/248635421): these annotations are part of android.car, but
-// they're still need on ATS
-java_library_static {
-    name: "android.car.annotations.compile-only",
-    srcs: [
-        "src/android/car/annotation/*",
-        "src/android/car/ApiVersion.java",
-        "src/android/car/CarVersion.java",
-        "src/android/car/PlatformVersion.java",
-    ],
-}
 
 stubs_defaults {
     name: "android.car-docs-default",
@@ -134,6 +146,11 @@ stubs_defaults {
     libs: [
         "android.car",
     ],
+    product_variables: {
+        pdk: {
+            enabled: false,
+        },
+    },
 }
 
 genrule {
@@ -161,9 +178,8 @@ genrule {
 droidstubs {
     name: "android.car-stubs-docs",
     defaults: ["android.car-docs-default"],
-    args: "--hide UnavailableSymbol --hide HiddenSuperclass --stub-packages android.car* " +
-        "--hide-package com.android.internal --hide-package com.android.car.internal " +
-        "--error UnflaggedApi",
+    args: "--hide UnavailableSymbol --no-docs --stub-packages android.car* " +
+        "--hide-package com.android.internal ",
     installable: false,
     check_api: {
         last_released: {
@@ -183,7 +199,7 @@ droidstubs {
         api_lint: {
             enabled: true,
             baseline_file: "api/lint-baseline.txt",
-        },
+        }
     },
 }
 
@@ -192,9 +208,8 @@ droidstubs {
     defaults: ["android.car-docs-default"],
     // TODO(b/174572385): Remove CallbackInterface once this b/174572385 is fixed
     args: "--hide CallbackInterface --hide UnavailableSymbol --hide HiddenSuperclass " +
-        "--stub-packages android.car* " +
-        "--show-annotation android.annotation.SystemApi --hide-package com.android.internal " +
-        "--hide-package com.android.car.internal --error UnflaggedApi",
+        "--no-docs --stub-packages android.car* " +
+        "--show-annotation android.annotation.SystemApi --hide-package com.android.internal ",
     installable: false,
     check_api: {
         last_released: {
@@ -214,24 +229,23 @@ droidstubs {
         api_lint: {
             enabled: true,
             baseline_file: "api/system-lint-baseline.txt",
-        },
+        }
     },
 }
 
 droidstubs {
     name: "android.car-test-stubs-docs",
     defaults: ["android.car-docs-default"],
-    args: "--hide HiddenSuperclass --hide UnavailableSymbol --stub-packages android.car* " +
-        "--show-annotation android.annotation.TestApi " +
-        "--show-annotation android.annotation.SystemApi",
+    args: "--hide HiddenSuperclass --hide UnavailableSymbol --no-docs --stub-packages android.car* " +
+        "--show-annotation android.annotation.TestApi ",
     installable: false,
     check_api: {
         current: {
             api_file: "api/test-current.txt",
             removed_api_file: "api/test-removed.txt",
             args: " -error 2 -error 3 -error 4 -error 5 -error 6 -error 7 -error 8 -error 9 -error 10 -error 11 " +
-                " -error 12 -error 13 -error 14 -error 15 -error 16 -error 17 -error 18 -error 19 -error 20 " +
-                " -error 21 -error 23 -error 24 -error 25 -hide 113 ",
+                  " -error 12 -error 13 -error 14 -error 15 -error 16 -error 17 -error 18 -error 19 -error 20 " +
+                  " -error 21 -error 23 -error 24 -error 25 -hide 113 ",
         },
     },
 }
@@ -245,8 +259,13 @@ droidstubs {
         "android.car",
     ],
     api_filename: "api.txt",
-    args: "--hide HiddenSuperclass --hide UnavailableSymbol --stub-packages android.car* ",
+    args: "--hide HiddenSuperclass --hide UnavailableSymbol --no-docs --stub-packages android.car* ",
     installable: false,
+    product_variables: {
+        pdk: {
+            enabled: false,
+        },
+    },
 }
 
 // Generates stubs for API documentation.
@@ -272,13 +291,13 @@ droidstubs {
     ],
     // Add --verbose to print metalava details.
     args: "--manifest $(location AndroidManifest.xml) " +
-        "--error UnhiddenSystemApi " +
-        "--hide RequiresPermission " +
-        "--hide CallbackInterface " +
-        "--hide MissingPermission " +
-        "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
-        "--hide SdkConstant --hide HiddenTypeParameter " +
-        "--hide Todo ",
+          "--error UnhiddenSystemApi " +
+          "--hide RequiresPermission " +
+          "--hide CallbackInterface " +
+          "--hide MissingPermission " +
+          "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
+          "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
+          "--hide Todo --hide Typo ",
     write_sdk_values: true,
 }
 
@@ -320,72 +339,91 @@ droiddoc {
         "-stubpackages android.car -dac_libraryroot android/car ",
 }
 
-java_defaults {
-    name: "android.car-stubs.jar_defaults",
-    java_version: "1.8",
-    installable: false,
-}
-
-java_defaults {
-    name: "android.car-stubs-dex.jar_defaults",
-    compile_dex: true,
-}
-
 java_library {
     name: "android.car-stubs",
-    defaults: ["android.car-stubs.jar_defaults"],
     srcs: [
         ":android.car-stub-docs",
     ],
     sdk_version: "current",
+    product_variables: {
+        pdk: {
+            enabled: false,
+        },
+    },
+    installable: false,
     dist: {
         targets: ["dist_files"],
-    },
+    }
 }
 
 java_library {
     name: "android.car-stubs-dex",
-    defaults: ["android.car-stubs-dex.jar_defaults"],
     static_libs: ["android.car-stubs"],
     sdk_version: "current",
+    product_variables: {
+        pdk: {
+            enabled: false,
+        },
+    },
+    compile_dex: true,
 }
 
 java_library {
     name: "android.car-system-stubs",
-    defaults: ["android.car-stubs.jar_defaults"],
     srcs: [
         ":android.car-system-stubs-docs",
     ],
     sdk_version: "system_current",
+    product_variables: {
+        pdk: {
+            enabled: false,
+        },
+    },
+    installable: false,
     dist: {
         targets: ["dist_files"],
-    },
+    }
 }
 
 java_library {
     name: "android.car-system-stubs-dex",
-    defaults: ["android.car-stubs-dex.jar_defaults"],
     static_libs: ["android.car-system-stubs"],
     sdk_version: "system_current",
+    product_variables: {
+        pdk: {
+            enabled: false,
+        },
+    },
+    compile_dex: true,
 }
 
 java_library {
     name: "android.car-test-stubs",
-    defaults: ["android.car-stubs.jar_defaults"],
     srcs: [
         ":android.car-test-stubs-docs",
     ],
     sdk_version: "test_current",
+    product_variables: {
+        pdk: {
+            enabled: false,
+        },
+    },
+    installable: false,
 }
 
 java_library {
     name: "android.car-test-stubs-dex",
-    defaults: ["android.car-stubs-dex.jar_defaults"],
     static_libs: ["android.car-test-stubs"],
     sdk_version: "test_current",
+    product_variables: {
+        pdk: {
+            enabled: false,
+        },
+    },
+    compile_dex: true,
     dist: {
         targets: ["dist_files"],
-    },
+    }
 }
 
 // Export the api/system-current.txt file.
