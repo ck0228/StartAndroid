@@ -53,7 +53,7 @@ public class EvSafeServiceNotificationHelper {
                 EvSafeServiceConfigs.Notification.WARNING_CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(message)
-                .setSmallIcon(R.drawable.ic_dialog_alert) // 애플리케이션 리소스에서 아이콘을 가져옴
+                .setSmallIcon(android.R.drawable.ic_dialog_alert)
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build();
