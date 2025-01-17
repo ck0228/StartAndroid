@@ -20,13 +20,13 @@
 -  Speed Check on System Service
     - [X] Current Speed Check on System Service
 ------------------------------------
-### STEP 3 (🔥 WORKING ON)
+### STEP 3 (✅ COMPLETED)
 
 - Speed Check on System Service
     - [X] Send Notification when Available Range is below 100km
 ------------------------------------
 
-## Version 2 (🔥 WORKING ON)
+## Version 2 (✅ COMPLETED)
 ### STEP 4 (✅ COMPLETED)
 #### EvSafeService on Framework Level
 - [X] Vehicle Status callbacks
@@ -37,49 +37,35 @@
 - [X] Deconnect ServiceNotification
 - [X] Leave WarningNotification Only
 ------------------------------------
-### STEP 5 (✅ COMPLETEDN)
+### STEP 5 (✅ COMPLETED)
 - Interface with EvSafe App
     - [X] Send and Get Vehicle Status
     - [X] Update Status
     - [X] Handle EvSafe App
 - [X] Modify BluePrint and Manifest files
+- [X] Broadcast only when Statuses are changed in EvSafeService
 ------------------------------------
-### STEP 6 (Additional)
-- [ ] Study BluePrint and Manifest files
-- [ ] Broadcast only when Statuses are changed in EvSafeService
-- [ ] Broadcast statuses seperately
+
+## Version 3 (✅ COMPLETED)
+- [X] Bind Service between App and Service
+- [X] Callback Seperately
 
 
-
-## Architecture -- need to be updated
+## Architecture
 | Layers                      | Components                                 |
 |-------------------------------|-----------------------------------------|
-| **EVSafe Application**         | updateVehicleStatus()<br> - Gear<br> - Battery<br> - Speed<br> - Range |
+| **EVSafe Application**         | MainActivity |
 |                               |                                         |
-| **API**                       | intent, binder, car api                    |
+| **API**                       | IEvSafeService.aidl<br> IEvSafeServiceCallback.aidl                    |
 |                               |                                         |
-| **EvSafeService**      | EvSafeService    |
+| **EvSafeService**      | EvSafeService<br> EvSafeServiceData<br> EvSafeServiceDataManager    |
 |                               |                                         |
-| **Android Native Service**     | CarPropertyManager                   |
+| **Car Service**     | CarPropertyManager<br> NotificationHelper<br> BootCompleteReceiver                   |
 |                               |                                         |
-| **OS System Service**          | Notification, Toast Message, Service     |
+| **VHAL**          | Car Properties   |
 
+------------------------------------
 
-
-# Env
-- OS : linux
-- Verion : android 12
-- Branch : android-12.0.0_r13
-- Lunch : sdk_car_x86_64-userdebug
-
-# References
-- https://developer.android.com/reference/android/car/VehiclePropertyIds?hl=en
-- https://cs.android.com/android/platform/superproject/+/android-12.0.0_r14:
-- Udemy: Android Open Source Project Development (AOSP) - Android Automotive
-  https://www.udemy.com/course/android-os-internals-aosp-automotive-development
-- Inside Android OS (book)
-
-----
 # ADBS
 - 현재 배터리 잔량 설정 (kWh)
 ```
@@ -98,3 +84,16 @@ adb shell cmd car_service inject-vhal-event 0x11600207 0x1 60
 ```
 adb shell cmd car_service inject-vhal-event 0x11400400 0x1 4
 ```
+------------------------------------
+# Env
+- OS : linux
+- Verion : android 12
+- Branch : android-12.0.0_r13
+- Lunch : sdk_car_x86_64-userdebug
+
+# References
+- https://developer.android.com/reference/android/car/VehiclePropertyIds?hl=en
+- https://cs.android.com/android/platform/superproject/+/android-12.0.0_r14:
+- Udemy: Android Open Source Project Development (AOSP) - Android Automotive
+  https://www.udemy.com/course/android-os-internals-aosp-automotive-development
+- Inside Android OS (book)
